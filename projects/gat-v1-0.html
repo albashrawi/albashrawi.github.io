@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<script>
+(function(){
+  try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}
+  catch(e){var m={};var st={getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null}};try{Object.defineProperty(window,'localStorage',{value:st,configurable:true});}catch(e2){}}
+  function modal(msg,buttons){
+    var o=document.createElement('div');
+    o.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl;font-family:inherit';
+    var c=document.createElement('div');
+    c.style.cssText='background:#fff;color:#111;border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.35);line-height:1.8;font-size:16px';
+    var p=document.createElement('div');p.textContent=msg;p.style.marginBottom='18px';c.appendChild(p);
+    var r=document.createElement('div');r.style.cssText='display:flex;gap:10px;justify-content:flex-start';
+    buttons.forEach(function(b){var x=document.createElement('button');x.textContent=b.t;x.style.cssText='padding:8px 20px;border-radius:10px;border:0;font:inherit;cursor:pointer;background:'+(b.p?'#2563eb':'#e5e7eb')+';color:'+(b.p?'#fff':'#111');x.onclick=function(){o.remove();if(b.f)b.f();};r.appendChild(x);});
+    c.appendChild(r);o.appendChild(c);document.body.appendChild(o);
+  }
+  window.alert=function(msg){modal(String(msg),[{t:'حسنًا',p:true}]);};
+  window.__ask=function(msg,yes){modal(String(msg),[{t:'نعم',p:true,f:yes},{t:'إلغاء'}]);};
+})();
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خطة مذاكرة القدرات الشاملة (المكثفة) | GAT Intensive Study Planner — v1.0</title>
+    <!-- Custom Favicon (Inline SVG fallback with custom icon) -->
+    <link rel="icon" type="image/png" href="C:\Users\Mujtaba\Downloads\My Own\Profile Picture [].png">
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cerulean: {
+                            DEFAULT: '#007BA7',
+                            dark: '#006285',
+                            light: '#0095ca',
+                            100: '#e0f4fc'
+                        },
+                        iceblue: {
+                            DEFAULT: '#f0f9ff',
+                            light: '#f8fafc',
+                            card: '#e0f2fe',
+                            border: '#cbd5e1'
+                        },
+                        itqan: {
+                            DEFAULT: '#DC2626',
+                            light: '#FEE2E2',
+                            border: '#FCA5A5'
+                        },
+                        zeitouna: {
+                            DEFAULT: '#059669',
+                            light: '#D1FAE5',
+                            border: '#6EE7B7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'header': '16px',
+                        'card': '14px',
+                        'table': '12px',
+                        'checkbox': '5px'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .bg-cerulean-main { background-color: #007BA7; }
+        .border-cerulean-main { border-color: #007BA7; }
+        .text-cerulean-main { color: #007BA7; }
+
+        .manual-checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            user-select: none;
+            font-weight: 800;
+            font-size: 11px;
+        }
+
+        .manual-checkbox.state-done {
+            background-color: #10b981 !important;
+            border-color: #10b981 !important;
+            color: white !important;
+        }
+
+        .manual-checkbox.state-postponed {
+            background-color: #0284c7 !important;
+            border-color: #0284c7 !important;
+            color: white !important;
+        }
+
+        .manual-checkbox.state-review {
+            background-color: #ef4444 !important;
+            border-color: #ef4444 !important;
+            color: white !important;
+        }
+
+        .planner-table td, .planner-table th {
+            padding-top: 9px;
+            padding-bottom: 9px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+
+        .flat-card {
+            box-shadow: none;
+        }
+
+        /* Dynamic Column Collapse */
+        .col-hidden {
+            display: none !important;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: #ffffff !important; color: #1e293b !important; padding: 0; }
+            .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
+            .flat-card { border: 1px solid #cbd5e1 !important; break-inside: avoid; }
+            .page-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body class="p-3 md:p-6 min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+
+    <div class="max-w-7xl mx-auto space-y-5">
+
+        <!-- Top Header Banner -->
+        <header class="bg-cerulean-main text-white p-5 md:p-7 rounded-header shadow-sm relative overflow-hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="bg-white/25 text-white text-xs font-bold px-3 py-1 rounded-full">صفحة واحدة شاملة</span>
+                        <span class="text-xs text-cerulean-100 font-semibold">
+                            <i class="fa-regular fa-calendar-alt ml-1"></i> تاريخ الاختبار: 7 أكتوبر 2026 | جدولة دقيقة ومتابعة يومية
+                        </span>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-black mt-2">خطة مذاكرة القدرات الشاملة (المكثفة)</h1>
+                </div>
+                
+                <div class="flex items-center gap-2 no-print self-end md:self-center">
+                    <button onclick="toggleDarkMode()" class="bg-white/15 hover:bg-white/25 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5" id="dark-mode-btn">
+                        <span id="dark-mode-icon"><i class="fa-solid fa-moon"></i></span> <span id="dark-mode-text">الوضع الداكن</span>
+                    </button>
+                    <button onclick="resetAllProgress()" class="bg-white/10 hover:bg-white/20 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition">
+                        <i class="fa-solid fa-rotate-right ml-1"></i> إعادة ضبط
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Summary Cards -->
+        <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+            <div class="bg-iceblue dark:bg-slate-900 border border-iceblue-border dark:border-slate-800 p-3.5 rounded-card flat-card text-center">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">الكمي اليومي (المفكر)</span>
+                <div class="text-base md:text-lg font-black text-cerulean-main dark:text-sky-400 mt-1">135 - 140 <span class="text-[10px]">سؤالاً</span></div>
+                <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div id="bar-quant" class="bg-cerulean-main dark:bg-sky-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="bg-iceblue dark:bg-slate-900 border border-iceblue-border dark:border-slate-800 p-3.5 rounded-card flat-card text-center">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">بنك الأسئلة</span>
+                <div class="text-base md:text-lg font-black text-cerulean-main dark:text-sky-400 mt-1">3 - 4 <span class="text-[10px]">محاضرات</span></div>
+                <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div id="bar-bank" class="bg-cerulean-main dark:bg-sky-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="bg-itqan-light/60 dark:bg-red-950/40 border border-itqan-border dark:border-red-900/50 p-3.5 rounded-card flat-card text-center">
+                <span class="text-xs font-bold text-itqan dark:text-red-400">إتقان (الحمراء)</span>
+                <div class="text-base md:text-lg font-black text-itqan dark:text-red-400 mt-1">10 - 11 <span class="text-[10px]">مقطعاً</span></div>
+                <div class="w-full bg-red-200 dark:bg-red-950 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div id="bar-itqan" class="bg-itqan dark:bg-red-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="bg-zeitouna-light/60 dark:bg-emerald-950/40 border border-zeitouna-border dark:border-emerald-900/50 p-3.5 rounded-card flat-card text-center">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-xs font-bold text-zeitouna dark:text-emerald-400">الزيتونة</span>
+                    <button onclick="openFullZaytounaModal()" class="text-[10px] bg-zeitouna text-white px-2 py-0.5 rounded-md hover:bg-emerald-700 transition">
+                        <i class="fa-solid fa-book-open ml-1"></i>الفهرس الكامل
+                    </button>
+                </div>
+                <div class="text-base md:text-lg font-black text-zeitouna dark:text-emerald-400 mt-1">14 <span class="text-[10px]">قسمًا/يوم</span></div>
+                <div class="w-full bg-emerald-200 dark:bg-emerald-950 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div id="bar-zeitouna" class="bg-zeitouna dark:bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="bg-iceblue dark:bg-slate-900 border border-iceblue-border dark:border-slate-800 p-3.5 rounded-card flat-card text-center col-span-2 sm:col-span-1">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">الكراش كورس</span>
+                <div class="text-base md:text-lg font-black text-cerulean-main dark:text-sky-400 mt-1">مقاطع واختبارات</div>
+                <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div id="bar-crash" class="bg-cerulean-main dark:bg-sky-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Column Visibility Control Panel -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 px-5 rounded-card flat-card no-print">
+            <div class="flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="font-extrabold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-eye-slash text-cerulean-main dark:text-sky-400"></i>
+                    <span>إخفاء / إظهار الأعمدة (طوي):</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 font-semibold text-slate-600 dark:text-slate-300">
+                    <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="toggle-col-1" checked onchange="toggleColumn(1, this.checked)" class="rounded text-cerulean-main focus:ring-0">
+                        <span>المفكر</span>
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="toggle-col-2" checked onchange="toggleColumn(2, this.checked)" class="rounded text-cerulean-main focus:ring-0">
+                        <span>بنك الأسئلة</span>
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="toggle-col-3" checked onchange="toggleColumn(3, this.checked)" class="rounded text-cerulean-main focus:ring-0">
+                        <span class="text-itqan dark:text-red-400 font-bold">الأقسام الحمراء</span>
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="toggle-col-4" checked onchange="toggleColumn(4, this.checked)" class="rounded font-bold text-zeitouna focus:ring-0">
+                        <span class="text-zeitouna dark:text-emerald-400 font-bold">الزيتونة</span>
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="toggle-col-5" checked onchange="toggleColumn(5, this.checked)" class="rounded text-cerulean-main focus:ring-0">
+                        <span>الكراش كورس</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tracking Notation & Legend Bar -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 px-5 rounded-card flat-card flex flex-wrap justify-between items-center gap-3 text-xs">
+            <div class="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
+                <i class="fa-solid fa-list-check text-cerulean-main dark:text-sky-400"></i>
+                <span>مربعات التتبع والترميز (انقر لتغيير الحالة):</span>
+            </div>
+            <div class="flex items-center gap-4 flex-wrap font-semibold">
+                <div class="flex items-center gap-1.5">
+                    <span class="manual-checkbox state-done bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700">✓</span>
+                    <span class="text-slate-600 dark:text-slate-400">تم الإنجاز</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="manual-checkbox state-postponed bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700">L</span>
+                    <span class="text-slate-600 dark:text-slate-400">تأجيل</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="manual-checkbox state-review bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700">!</span>
+                    <span class="text-slate-600 dark:text-slate-400">مراجعة أخطاء</span>
+                </div>
+            </div>
+            <div class="text-slate-500 dark:text-slate-400 font-bold">
+                إجمالي الإنجاز: <span id="overall-percentage" class="text-cerulean-main dark:text-sky-400 font-black">0%</span>
+            </div>
+        </section>
+
+        <!-- PHASE 1: EXECUTION & DAILY INTENSIVE SOLVING -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-table overflow-hidden flat-card">
+            <div class="bg-cerulean-main text-white p-3.5 px-5 flex flex-wrap items-center justify-between gap-2">
+                <h2 class="text-base font-extrabold flex items-center gap-2">
+                    <span class="bg-white/20 w-6 h-6 rounded flex items-center justify-center text-xs">1</span>
+                    المرحلة الأولى: التنفيذ والحل اليومي المكثف
+                </h2>
+                <span id="days-remaining" class="text-xs bg-white/20 px-3 py-1 rounded-full text-white font-bold">جاري الحساب...</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full planner-table text-right border-collapse text-xs" id="main-planner-table">
+                    <thead>
+                        <tr class="bg-iceblue dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 font-extrabold border-b border-slate-200 dark:border-slate-800">
+                            <th class="border-l border-slate-200 dark:border-slate-800 col-0 w-[14%]">اليوم والتاريخ</th>
+                            <th class="border-l border-slate-200 dark:border-slate-800 text-center col-1 w-[18%]">المفكر (1354)</th>
+                            <th class="border-l border-slate-200 dark:border-slate-800 text-center col-2 w-[18%]">إيهاب - بنك الأسئلة</th>
+                            <th class="border-l border-slate-200 dark:border-slate-800 text-center col-3 w-[18%] bg-itqan-light/40 dark:bg-red-950/30 text-itqan dark:text-red-400">إتقان - الأقسام الحمراء</th>
+                            <th class="border-l border-slate-200 dark:border-slate-800 text-center col-4 w-[18%] bg-zeitouna-light/40 dark:bg-emerald-950/30 text-zeitouna dark:text-emerald-400">الزيتونة (139 قسمًا)</th>
+                            <th class="text-center col-5 w-[14%]">إيهاب - الكراش كورس</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-semibold text-slate-700 dark:text-slate-300">
+                        
+                        <!-- Day 1 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 col-0">الجمعة 25 سبتمبر</td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-1">
+                                <div class="flex items-center justify-between gap-1"><span>أسئلة 1 - 140</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d1_c1"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-2">
+                                <div class="flex items-center justify-between gap-1"><span>محاضرات 1 - 3</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d1_c2"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-itqan-light/10 dark:bg-red-950/10 col-3">
+                                <div class="flex items-center justify-between gap-1"><span class="text-itqan dark:text-red-400 font-bold">مقاطع 1 - 10</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d1_c3"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-zeitouna-light/10 dark:bg-emerald-950/10 col-4">
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" onclick="openZaytounaRangeModal(1, 14)" class="text-zeitouna dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 group text-right">
+                                        <span>أقسام 1 - 14</span>
+                                        <i class="fa-solid fa-circle-info text-[10px] opacity-70 group-hover:opacity-100 transition"></i>
+                                    </button>
+                                    <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d1_c5"></div>
+                                </div>
+                            </td>
+                            <td class="col-5">
+                                <div class="flex items-center justify-between gap-1"><span>مقطع 1 (قسم 20)</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d1_c4"></div></div>
+                            </td>
+                        </tr>
+
+                        <!-- Day 2 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 col-0">السبت 26 سبتمبر</td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-1">
+                                <div class="flex items-center justify-between gap-1"><span>أسئلة 141 - 280</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d2_c1"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-2">
+                                <div class="flex items-center justify-between gap-1"><span>محاضرات 4 - 6</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d2_c2"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-itqan-light/10 dark:bg-red-950/10 col-3">
+                                <div class="flex items-center justify-between gap-1"><span class="text-itqan dark:text-red-400 font-bold">مقاطع 11 - 20</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d2_c3"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-zeitouna-light/10 dark:bg-emerald-950/10 col-4">
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" onclick="openZaytounaRangeModal(15, 28)" class="text-zeitouna dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 group text-right">
+                                        <span>أقسام 15 - 28</span>
+                                        <i class="fa-solid fa-circle-info text-[10px] opacity-70 group-hover:opacity-100 transition"></i>
+                                    </button>
+                                    <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d2_c5"></div>
+                                </div>
+                            </td>
+                            <td class="col-5">
+                                <div class="flex items-center justify-between gap-1"><span>مقطع 2 (قسم 52)</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d2_c4"></div></div>
+                            </td>
+                        </tr>
+
+                        <!-- Day 3 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 col-0">الأحد 27 سبتمبر</td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-1">
+                                <div class="flex items-center justify-between gap-1"><span>أسئلة 281 - 420</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d3_c1"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-2">
+                                <div class="flex items-center justify-between gap-1"><span>محاضرات 7 - 9</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d3_c2"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-itqan-light/10 dark:bg-red-950/10 col-3">
+                                <div class="flex items-center justify-between gap-1"><span class="text-itqan dark:text-red-400 font-bold">مقاطع 21 - 30</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d3_c3"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-zeitouna-light/10 dark:bg-emerald-950/10 col-4">
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" onclick="openZaytounaRangeModal(29, 42)" class="text-zeitouna dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 group text-right">
+                                        <span>أقسام 29 - 42</span>
+                                        <i class="fa-solid fa-circle-info text-[10px] opacity-70 group-hover:opacity-100 transition"></i>
+                                    </button>
+                                    <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d3_c5"></div>
+                                </div>
+                            </td>
+                            <td class="col-5">
+                                <div class="flex items-center justify-between gap-1"><span>مقطع 3 (قسم 79)</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d3_c4"></div></div>
+                            </td>
+                        </tr>
+
+                        <!-- Day 4 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 col-0">الإثنين 28 سبتمبر</td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-1">
+                                <div class="flex items-center justify-between gap-1"><span>أسئلة 421 - 560</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d4_c1"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-2">
+                                <div class="flex items-center justify-between gap-1"><span>محاضرات 10 - 13</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d4_c2"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-itqan-light/10 dark:bg-red-950/10 col-3">
+                                <div class="flex items-center justify-between gap-1"><span class="text-itqan dark:text-red-400 font-bold">مقاطع 31 - 40</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d4_c3"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-zeitouna-light/10 dark:bg-emerald-950/10 col-4">
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" onclick="openZaytounaRangeModal(43, 56)" class="text-zeitouna dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 group text-right">
+                                        <span>أقسام 43 - 56</span>
+                                        <i class="fa-solid fa-circle-info text-[10px] opacity-70 group-hover:opacity-100 transition"></i>
+                                    </button>
+                                    <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d4_c5"></div>
+                                </div>
+                            </td>
+                            <td class="col-5">
+                                <div class="flex items-center justify-between gap-1"><span>مقطع 4 (قسم 106)</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d4_c4"></div></div>
+                            </td>
+                        </tr>
+
+                        <!-- Day 5 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 col-0">الثلاثاء 29 سبتمبر</td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-1">
+                                <div class="flex items-center justify-between gap-1"><span>أسئلة 561 - 700</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d5_c1"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-2">
+                                <div class="flex items-center justify-between gap-1"><span>محاضرات 14 - 17</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d5_c2"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-itqan-light/10 dark:bg-red-950/10 col-3">
+                                <div class="flex items-center justify-between gap-1"><span class="text-itqan dark:text-red-400 font-bold">مقاطع 41 - 50</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d5_c3"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-zeitouna-light/10 dark:bg-emerald-950/10 col-4">
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" onclick="openZaytounaRangeModal(57, 70)" class="text-zeitouna dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 group text-right">
+                                        <span>أقسام 57 - 70</span>
+                                        <i class="fa-solid fa-circle-info text-[10px] opacity-70 group-hover:opacity-100 transition"></i>
+                                    </button>
+                                    <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d5_c5"></div>
+                                </div>
+                            </td>
+                            <td class="col-5">
+                                <div class="flex items-center justify-between gap-1"><span>مقطع 5 (قسم 261)</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d5_c4"></div></div>
+                            </td>
+                        </tr>
+
+                        <!-- Day 6 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 col-0">الأربعاء 30 سبتمبر</td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-1">
+                                <div class="flex items-center justify-between gap-1"><span>أسئلة 701 - 840</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d6_c1"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-2">
+                                <div class="flex items-center justify-between gap-1"><span>محاضرات 18 - 21</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d6_c2"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-itqan-light/10 dark:bg-red-950/10 col-3">
+                                <div class="flex items-center justify-between gap-1"><span class="text-itqan dark:text-red-400 font-bold">مقاطع 51 - 62</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d6_c3"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-zeitouna-light/10 dark:bg-emerald-950/10 col-4">
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" onclick="openZaytounaRangeModal(71, 84)" class="text-zeitouna dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 group text-right">
+                                        <span>أقسام 71 - 84</span>
+                                        <i class="fa-solid fa-circle-info text-[10px] opacity-70 group-hover:opacity-100 transition"></i>
+                                    </button>
+                                    <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d6_c5"></div>
+                                </div>
+                            </td>
+                            <td class="col-5">
+                                <div class="flex items-center justify-between gap-1"><span>اختبار كراش (1-52)</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d6_c4"></div></div>
+                            </td>
+                        </tr>
+
+                        <!-- Day 7 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 col-0">الخميس 1 أكتوبر</td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-1">
+                                <div class="flex items-center justify-between gap-1"><span>أسئلة 841 - 980</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d7_c1"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-2">
+                                <div class="flex items-center justify-between gap-1"><span>محاضرات 22 - 25</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d7_c2"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-itqan-light/10 dark:bg-red-950/10 col-3">
+                                <div class="flex items-center justify-between gap-1"><span class="text-itqan dark:text-red-400 font-bold">مقاطع 63 - 75</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d7_c3"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-zeitouna-light/10 dark:bg-emerald-950/10 col-4">
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" onclick="openZaytounaRangeModal(85, 98)" class="text-zeitouna dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 group text-right">
+                                        <span>أقسام 85 - 98</span>
+                                        <i class="fa-solid fa-circle-info text-[10px] opacity-70 group-hover:opacity-100 transition"></i>
+                                    </button>
+                                    <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d7_c5"></div>
+                                </div>
+                            </td>
+                            <td class="col-5">
+                                <div class="flex items-center justify-between gap-1"><span>اختبار (53-106)</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d7_c4"></div></div>
+                            </td>
+                        </tr>
+
+                        <!-- Day 8 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 col-0">الجمعة 2 أكتوبر</td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-1">
+                                <div class="flex items-center justify-between gap-1"><span>أسئلة 981 - 1120</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d8_c1"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-2">
+                                <div class="flex items-center justify-between gap-1"><span>محاضرات 26 - 29</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d8_c2"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-itqan-light/10 dark:bg-red-950/10 col-3">
+                                <div class="flex items-center justify-between gap-1"><span class="text-itqan dark:text-red-400 font-bold">مقاطع 76 - 88</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d8_c3"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-zeitouna-light/10 dark:bg-emerald-950/10 col-4">
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" onclick="openZaytounaRangeModal(99, 112)" class="text-zeitouna dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 group text-right">
+                                        <span>أقسام 99 - 112</span>
+                                        <i class="fa-solid fa-circle-info text-[10px] opacity-70 group-hover:opacity-100 transition"></i>
+                                    </button>
+                                    <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d8_c5"></div>
+                                </div>
+                            </td>
+                            <td class="col-5">
+                                <div class="flex items-center justify-between gap-1"><span>اختبار (107-261)</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d8_c4"></div></div>
+                            </td>
+                        </tr>
+
+                        <!-- Day 9 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 col-0">السبت 3 أكتوبر</td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-1">
+                                <div class="flex items-center justify-between gap-1"><span>أسئلة 1121 - 1260</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d9_c1"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-2">
+                                <div class="flex items-center justify-between gap-1"><span>محاضرات 30 - 33</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d9_c2"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-itqan-light/10 dark:bg-red-950/10 col-3">
+                                <div class="flex items-center justify-between gap-1"><span class="text-itqan dark:text-red-400 font-bold">مقاطع 89 - 102</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d9_c3"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-zeitouna-light/10 dark:bg-emerald-950/10 col-4">
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" onclick="openZaytounaRangeModal(113, 126)" class="text-zeitouna dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 group text-right">
+                                        <span>أقسام 113 - 126</span>
+                                        <i class="fa-solid fa-circle-info text-[10px] opacity-70 group-hover:opacity-100 transition"></i>
+                                    </button>
+                                    <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d9_c5"></div>
+                                </div>
+                            </td>
+                            <td class="col-5">
+                                <div class="flex items-center justify-between gap-1"><span>مراجعة كراش كورس</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d9_c4"></div></div>
+                            </td>
+                        </tr>
+
+                        <!-- Day 10 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 col-0">الأحد 4 أكتوبر</td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-1">
+                                <div class="flex items-center justify-between gap-1"><span>أسئلة 1261 - 1354</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d10_c1"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 col-2">
+                                <div class="flex items-center justify-between gap-1"><span>مراجعة أخطاء البنك</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d10_c2"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-itqan-light/10 dark:bg-red-950/10 col-3">
+                                <div class="flex items-center justify-between gap-1"><span class="text-itqan dark:text-red-400 font-bold">مراجعة أخطاء إتقان</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d10_c3"></div></div>
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 bg-zeitouna-light/10 dark:bg-emerald-950/10 col-4">
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" onclick="openZaytounaRangeModal(127, 139)" class="text-zeitouna dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 group text-right">
+                                        <span>أقسام 127 - 139 (ختام)</span>
+                                        <i class="fa-solid fa-circle-info text-[10px] opacity-70 group-hover:opacity-100 transition"></i>
+                                    </button>
+                                    <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d10_c5"></div>
+                                </div>
+                            </td>
+                            <td class="col-5">
+                                <div class="flex items-center justify-between gap-1"><span>مراجعة الفائقة</span><div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p1_d10_c4"></div></div>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- PHASE 2: FINAL COMPREHENSIVE REVIEW -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-table overflow-hidden flat-card page-break">
+            <div class="bg-cerulean-main text-white p-3.5 px-5 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="bg-white/20 w-6 h-6 rounded flex items-center justify-center text-xs">2</span>
+                    <h2 class="text-base font-extrabold">المرحلة الثانية: المراجعة الشاملة النهائية</h2>
+                </div>
+                <div class="bg-amber-400 text-slate-900 font-extrabold text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-900"></i>
+                    <span>أعلى أولوية قبل الاختبار</span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full planner-table text-right border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-iceblue dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 font-extrabold border-b border-slate-200 dark:border-slate-800">
+                            <th class="border-l border-slate-200 dark:border-slate-800 w-[20%]">اليوم والتاريخ</th>
+                            <th class="border-l border-slate-200 dark:border-slate-800 w-[68%]">المهام الشاملة والمراجعة التفصيلية</th>
+                            <th class="text-center w-[12%]">التتبع</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                        
+                        <!-- Phase 2 - Day 1 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 align-top pt-3">
+                                الإثنين 5 أكتوبر
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 space-y-1.5 py-3">
+                                <div class="font-extrabold text-slate-900 dark:text-slate-100 text-sm">مراجعة النماذج الفائقة والأخطاء الموثقة:</div>
+                                <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1 font-semibold pr-1">
+                                    <li>مراجعة الأقسام الأعلى تكراراً + أخطاء إتقان وبنك الأسئلة والزيتونة.</li>
+                                    <li>إعادة حل ملف الأخطاء الموثق بقلمك أثناء التدريب + القوانين الصعبة للكمي.</li>
+                                </ul>
+                            </td>
+                            <td class="text-center align-middle">
+                                <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p2_d1_c1"></div>
+                            </td>
+                        </tr>
+
+                        <!-- Phase 2 - Day 2 -->
+                        <tr>
+                            <td class="font-bold text-slate-900 dark:text-slate-100 border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 align-top pt-3">
+                                الثلاثاء 6 أكتوبر
+                            </td>
+                            <td class="border-l border-slate-200 dark:border-slate-800 space-y-1.5 py-3">
+                                <div class="font-extrabold text-slate-900 dark:text-slate-100 text-sm">التثبيت السريع والتهيئة النفسية (قبل الاختبار بيوم):</div>
+                                <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1 font-semibold pr-1">
+                                    <li>استذكار بصري لأهم الكلمات الصعبة والتناظرات.</li>
+                                    <li>التوقف عن أي مذاكرة مع العصر لإراحة الذهن والنوم المبكر لدخول الاختبار بأعلى تركيز.</li>
+                                </ul>
+                            </td>
+                            <td class="text-center align-middle">
+                                <div class="manual-checkbox bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" onclick="cycleCheckboxState(this)" id="p2_d2_c1"></div>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- User Notes Area -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-card p-4 flat-card">
+            <h3 class="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-pen-to-square text-cerulean-main dark:text-sky-400"></i>
+                <span>ملاحظات سريعة وقوانين تحتاج مراجعتها باستمرار:</span>
+            </h3>
+            <textarea id="user-notes" placeholder="سجل هنا أهم الملاحظات والقوانين التي تحتاج مراجعتها يوم الاختبار..." class="w-full h-20 p-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:border-cerulean-main dark:focus:border-sky-500 bg-iceblue/20 dark:bg-slate-800/50 resize-y font-semibold"></textarea>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-[11px] text-slate-500 dark:text-slate-400 py-2 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-1 font-semibold">
+            <div>خطة مذاكرة القدرات الشاملة - جدولة دقيقة ومتابعة يومية</div>
+            <div>يتم حفظ تقدمك وخيارات الأعمدة تلقائياً في المتصفح | قابلة للطباعة والتتبع الميداني</div>
+        </footer>
+
+    </div>
+
+    <!-- Zaytouna Index Details Modal -->
+    <div id="zaytouna-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden no-print">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <!-- Modal Header -->
+            <div class="bg-zeitouna text-white p-4 px-6 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-book-open text-lg"></i>
+                    <div>
+                        <h3 id="zaytouna-modal-title" class="font-extrabold text-base">فهرس أقسام الزيتونة</h3>
+                        <p id="zaytouna-modal-subtitle" class="text-xs text-emerald-100 font-semibold mt-0.5">تفاصيل الأقسام المحددة اليوم</p>
+                    </div>
+                </div>
+                <button onclick="closeZaytounaModal()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Search Input (Only shown for full index) -->
+            <div id="zaytouna-search-container" class="p-3 px-6 bg-emerald-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 hidden">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3 text-slate-400 text-xs"></i>
+                    <input type="text" id="zaytouna-search-input" oninput="filterZaytounaList()" placeholder="ابحث باسم القسم أو رقم الأقسام..." class="w-full pr-9 pl-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-zeitouna">
+                </div>
+            </div>
+
+            <!-- Modal Body (List of sections) -->
+            <div id="zaytouna-modal-body" class="p-4 px-6 overflow-y-auto space-y-2 flex-1">
+                <!-- Dynamic Content Generated by JS -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-3 px-6 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
+                <span id="zaytouna-modal-count" class="font-bold text-slate-500 dark:text-slate-400">إجمالي الأقسام: 0</span>
+                <button onclick="closeZaytounaModal()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 px-4 py-1.5 rounded-lg font-bold transition">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript logic for column toggling, cycling states, live countdown, persistent saving, and Dark Mode -->
+    <script>
+        const zaytounaData = [
+            { id: 1, name: 'كينيا وفضل الطيبة', page: 7 },
+            { id: 2, name: 'الزلازل والسكري', page: 11 },
+            { id: 3, name: 'الترجمة والرياضة', page: 15 },
+            { id: 4, name: 'الرشاشات وعمالة الأطفال', page: 18 },
+            { id: 5, name: 'النمل وترتيب العلماء', page: 23 },
+            { id: 6, name: 'مالك والقناعة', page: 27 },
+            { id: 7, name: 'الكافيين والإنسان المدني', page: 31 },
+            { id: 8, name: 'الزيت', page: 34 },
+            { id: 9, name: 'الأديب وفصول السنة', page: 37 },
+            { id: 10, name: 'ياقوت الحموي والصفدي', page: 40 },
+            { id: 11, name: 'الانزيمات والقراءة', page: 43 },
+            { id: 12, name: 'التقاويم وآثار الفضاء', page: 47 },
+            { id: 13, name: 'التربية والزعفران', page: 51 },
+            { id: 14, name: 'الأحذية والتخزين', page: 55 },
+            { id: 15, name: 'التوحيدي والعالم الافتراضي', page: 59 },
+            { id: 16, name: 'المعادلة الظالمة والاعتزاز بالنفس', page: 63 },
+            { id: 17, name: 'الجمل والطحالب', page: 67 },
+            { id: 18, name: 'الصفدي ووصف الجندي', page: 71 },
+            { id: 19, name: 'الجغرافيا الطبيعية والسمنة', page: 74 },
+            { id: 20, name: 'الحج والسدود', page: 78 },
+            { id: 21, name: 'الانزيمات والمماليك', page: 81 },
+            { id: 22, name: 'الألواح الشمسية والانفلونزا', page: 85 },
+            { id: 23, name: 'الهدية والنفط', page: 89 },
+            { id: 24, name: 'البكتيريا والمطرقة', page: 93 },
+            { id: 25, name: 'المحاولة شرف والمبادرة بالأعمال', page: 96 },
+            { id: 26, name: 'تلمسان وضبط المجرم', page: 100 },
+            { id: 27, name: 'الإنسان السعيد والفراسة', page: 104 },
+            { id: 28, name: 'المشكلات والرحمة', page: 107 },
+            { id: 29, name: 'الورق وكينيا', page: 110 },
+            { id: 30, name: 'الزعفران والقصة القصيرة', page: 114 },
+            { id: 31, name: 'البصمة والحواس', page: 117 },
+            { id: 32, name: 'التنمية والنمو والرضاعة', page: 121 },
+            { id: 33, name: 'روسيا وكسوة الكعبة', page: 125 },
+            { id: 34, name: 'الحياة الفطرية والانفجار السكاني', page: 129 },
+            { id: 35, name: 'النمل الأبيض', page: 133 },
+            { id: 36, name: 'أبو بكر الرازي وتنظيم الوقت', page: 136 },
+            { id: 37, name: 'واقع التعليم ونبي الرحمة', page: 140 },
+            { id: 38, name: 'الأديب والتطوع', page: 143 },
+            { id: 39, name: 'كسوة الكعبة والعمل عن بعد', page: 147 },
+            { id: 40, name: 'المكاتبة والربع الخالي', page: 151 },
+            { id: 41, name: 'المافيا واللغة العربية', page: 155 },
+            { id: 42, name: 'الحجامة والوقت', page: 159 },
+            { id: 43, name: 'البطاطس', page: 163 },
+            { id: 44, name: 'طلاقة الوجه والخضراوات', page: 166 },
+            { id: 45, name: 'عوامل الحسم وكيفية بيع الأرض', page: 170 },
+            { id: 46, name: 'آثار الفضاء ومعركة اليرموك', page: 174 },
+            { id: 47, name: 'المواد الدراسية', page: 178 },
+            { id: 48, name: 'الكريم واللئيم ولذة العبادة', page: 182 },
+            { id: 49, name: 'اليأس والشجاع', page: 185 },
+            { id: 50, name: 'الواقع الافتراضي والأكسجين', page: 188 },
+            { id: 51, name: 'التلفاز وإيطاليا واليابان', page: 192 },
+            { id: 52, name: 'النفط والتقاويم', page: 196 },
+            { id: 53, name: 'تسونامي والغلاف الجوي', page: 200 },
+            { id: 54, name: 'التصحيح والحسد', page: 204 },
+            { id: 55, name: 'الأدب والبراهين', page: 208 },
+            { id: 56, name: 'القلق والطفل', page: 211 },
+            { id: 57, name: 'قضم الأظافر والشيخوخة', page: 215 },
+            { id: 58, name: 'التفاؤل والمقابلة', page: 218 },
+            { id: 59, name: 'التمركز والفوليك', page: 222 },
+            { id: 60, name: 'البخاري والرازي', page: 228 },
+            { id: 61, name: 'تلاشي المستقبل والرجولة', page: 232 },
+            { id: 62, name: 'المراهقين والتفاؤل', page: 236 },
+            { id: 63, name: 'الهاتف والفنانين', page: 240 },
+            { id: 64, name: 'المأمون والنفط', page: 244 },
+            { id: 65, name: 'الندم واختلاف العقول', page: 247 },
+            { id: 66, name: 'التشخيص والمافيا', page: 250 },
+            { id: 67, name: 'العطش وتحمل المتاعب', page: 254 },
+            { id: 68, name: 'الوطواط والمسك', page: 257 },
+            { id: 69, name: 'الازدواجية اللغوية', page: 260 },
+            { id: 70, name: 'دوار الشمس والنخل', page: 264 },
+            { id: 71, name: 'التعليم والتضاريس', page: 268 },
+            { id: 72, name: 'كينيا والشاي', page: 272 },
+            { id: 73, name: 'المدرسة المونستيرية', page: 276 },
+            { id: 74, name: 'الانزيمات وفيتامين د', page: 280 },
+            { id: 75, name: 'البرازيل والأشعة السينية', page: 284 },
+            { id: 76, name: 'التنقيب عن النفط', page: 288 },
+            { id: 77, name: 'الجيوش والزلازل', page: 292 },
+            { id: 78, name: 'الغواصة الروسية والمنتديات', page: 296 },
+            { id: 79, name: 'جاما والمكتشفات البحرية', page: 299 },
+            { id: 80, name: 'الجدري وقياس الرأي العام', page: 303 },
+            { id: 81, name: 'التجارة الالكترونية والنفط', page: 306 },
+            { id: 82, name: 'القراءة وطريق الخير', page: 310 },
+            { id: 83, name: 'الأهلة والاختيار السليم', page: 313 },
+            { id: 84, name: 'الحرانكش والبحر الميت', page: 316 },
+            { id: 85, name: 'زحل والتالف', page: 321 },
+            { id: 86, name: 'حشرة السمك والتهاب اللوزتين', page: 324 },
+            { id: 87, name: 'التواضع وحلم الطفل', page: 327 },
+            { id: 88, name: 'المنظمات والفضاء', page: 330 },
+            { id: 89, name: 'الشركات الامريكية والعقاقير', page: 334 },
+            { id: 90, name: 'الأوروبيون والأزياء', page: 338 },
+            { id: 91, name: 'التوحد والتمور', page: 342 },
+            { id: 92, name: 'المنظمات الراغب بالنجاح', page: 346 },
+            { id: 93, name: 'القراءة', page: 350 },
+            { id: 94, name: 'الشوكولاته', page: 353 },
+            { id: 95, name: 'الشجاعة', page: 357 },
+            { id: 96, name: 'ابن فارس', page: 360 },
+            { id: 97, name: 'الأسواق المالية', page: 363 },
+            { id: 98, name: 'السمنة', page: 366 },
+            { id: 99, name: 'الرياح الموسمية', page: 369 },
+            { id: 100, name: 'التعصب الرياضي', page: 372 },
+            { id: 101, name: 'الثقة بالله', page: 375 },
+            { id: 102, name: 'الهدية', page: 378 },
+            { id: 103, name: 'نظام الويندوز', page: 381 },
+            { id: 104, name: 'السيوف', page: 384 },
+            { id: 105, name: 'المرداوي', page: 387 },
+            { id: 106, name: 'عبد الله بن عباس', page: 390 },
+            { id: 107, name: 'شجرة الزيتون', page: 393 },
+            { id: 108, name: 'اينشتاين', page: 396 },
+            { id: 109, name: 'احسان النية', page: 399 },
+            { id: 110, name: 'اللؤلؤ والرشاشات', page: 402 },
+            { id: 111, name: 'تشستر كارلسون', page: 405 },
+            { id: 112, name: 'سيء الظن', page: 408 },
+            { id: 113, name: 'الصقور والخسائر الاقتصادية', page: 411 },
+            { id: 114, name: 'القطب الجنوبي', page: 415 },
+            { id: 115, name: 'دودة القز', page: 418 },
+            { id: 116, name: 'الجاحظ', page: 421 },
+            { id: 117, name: 'الشعر', page: 424 },
+            { id: 118, name: 'السجن والدعوة الى الله', page: 427 },
+            { id: 119, name: 'الحزم', page: 430 },
+            { id: 120, name: 'النفط والسمنة', page: 433 },
+            { id: 121, name: 'الدعوة الى الله', page: 436 },
+            { id: 122, name: 'التوحيد', page: 439 },
+            { id: 123, name: 'الأخطار الاقتصادية', page: 442 },
+            { id: 124, name: 'الاحتراق الوظيفي', page: 445 },
+            { id: 125, name: 'جامعة الملك سعود', page: 448 },
+            { id: 126, name: 'التخطيط', page: 451 },
+            { id: 127, name: 'التعدين', page: 454 },
+            { id: 128, name: 'تعدد الأوجه والرعي البيئي', page: 457 },
+            { id: 129, name: 'التمر', page: 460 },
+            { id: 130, name: 'النفس', page: 463 },
+            { id: 131, name: 'البيولوجيا الصناعية', page: 466 },
+            { id: 132, name: 'حضارة أمريكا واليابان', page: 469 },
+            { id: 133, name: 'الرواية', page: 472 },
+            { id: 134, name: 'المناخ', page: 474 },
+            { id: 135, name: 'الرؤيا والبحر الميت', page: 476 },
+            { id: 136, name: 'الغواصة الروسية والازدواجية', page: 478 },
+            { id: 137, name: 'الألوان', page: 481 },
+            { id: 138, name: 'العصافير', page: 483 },
+            { id: 139, name: 'القمر', page: 485 }
+        ];
+
+        let currentModalList = [];
+
+        function openZaytounaRangeModal(start, end) {
+            const modal = document.getElementById('zaytouna-modal');
+            const title = document.getElementById('zaytouna-modal-title');
+            const subtitle = document.getElementById('zaytouna-modal-subtitle');
+            const searchBox = document.getElementById('zaytouna-search-container');
+            
+            title.textContent = `تفاصيل الزيتونة: الأقسام (${start} - ${end})`;
+            subtitle.textContent = `جدول المحتوى الخاص بهذا اليوم (${end - start + 1} أجزاء)`;
+            searchBox.classList.add('hidden');
+
+            const filtered = zaytounaData.filter(item => item.id >= start && item.id <= end);
+            renderZaytounaList(filtered);
+            
+            modal.classList.remove('hidden');
+        }
+
+        function openFullZaytounaModal() {
+            const modal = document.getElementById('zaytouna-modal');
+            const title = document.getElementById('zaytouna-modal-title');
+            const subtitle = document.getElementById('zaytouna-modal-subtitle');
+            const searchBox = document.getElementById('zaytouna-search-container');
+            const searchInput = document.getElementById('zaytouna-search-input');
+            
+            title.textContent = `فهرس قسم الزيتونة الكامل (139 قسمًا)`;
+            subtitle.textContent = `تصفح واستعرض جميع مواضيع وأقسام الزيتونة مع أرقام الصفحات`;
+            searchBox.classList.remove('hidden');
+            searchInput.value = '';
+
+            renderZaytounaList(zaytounaData);
+            modal.classList.remove('hidden');
+        }
+
+        function renderZaytounaList(list) {
+            currentModalList = list;
+            const container = document.getElementById('zaytouna-modal-body');
+            const countEl = document.getElementById('zaytouna-modal-count');
+
+            countEl.textContent = `إجمالي الأقسام المعروضة: ${list.length}`;
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-400">
+                        <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
+                        <p class="text-xs font-semibold">لم يتم العثور على أية أقسام تطابق البحث</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = list.map(item => `
+                <div class="flex items-center justify-between p-2.5 px-3.5 bg-iceblue/50 dark:bg-slate-800/60 hover:bg-emerald-100/60 dark:hover:bg-emerald-950/40 rounded-xl border border-slate-200/80 dark:border-slate-800 transition text-xs">
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-zeitouna text-white font-extrabold flex items-center justify-center text-[11px] shrink-0">
+                            ${item.id}
+                        </span>
+                        <span class="font-bold text-slate-800 dark:text-slate-100">
+                            قسم : ${item.name}
+                        </span>
+                    </div>
+                    <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                        ص ${item.page}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function filterZaytounaList() {
+            const query = document.getElementById('zaytouna-search-input').value.trim().toLowerCase();
+            if (!query) {
+                renderZaytounaList(zaytounaData);
+                return;
+            }
+
+            const filtered = zaytounaData.filter(item => 
+                item.name.toLowerCase().includes(query) || 
+                item.id.toString() === query ||
+                `قسم ${item.id}`.includes(query)
+            );
+            renderZaytounaList(filtered);
+        }
+
+        function closeZaytounaModal() {
+            document.getElementById('zaytouna-modal').classList.add('hidden');
+        }
+
+        const STORAGE_KEY = 'gat_intensive_plan_states_v5';
+        const NOTES_KEY = 'gat_intensive_plan_notes_v5';
+        const THEME_KEY = 'gat_intensive_plan_theme_v5';
+        const COLUMNS_KEY = 'gat_intensive_plan_cols_v5';
+
+        // States: '' (unchecked) -> 'done' (✓) -> 'postponed' (L) -> 'review' (!)
+        const STATES = ['', 'done', 'postponed', 'review'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            updateDaysRemaining();
+            loadSavedStates();
+            loadSavedNotes();
+            loadColumnVisibility();
+            calculateProgress();
+
+            document.getElementById('user-notes').addEventListener('input', (e) => {
+                localStorage.setItem(NOTES_KEY, e.target.value);
+            });
+        });
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem(THEME_KEY);
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                updateThemeButtonUI(true);
+            } else {
+                document.documentElement.classList.remove('dark');
+                updateThemeButtonUI(false);
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+            updateThemeButtonUI(isDark);
+        }
+
+        function updateThemeButtonUI(isDark) {
+            const icon = document.getElementById('dark-mode-icon');
+            const text = document.getElementById('dark-mode-text');
+            if (!icon || !text) return;
+
+            if (isDark) {
+                icon.innerHTML = '<i class="fa-solid fa-sun"></i>';
+                text.textContent = 'الوضع الفاتح';
+            } else {
+                icon.innerHTML = '<i class="fa-solid fa-moon"></i>';
+                text.textContent = 'الوضع الداكن';
+            }
+        }
+
+        function toggleColumn(colIndex, isVisible) {
+            const elements = document.querySelectorAll(`#main-planner-table .col-${colIndex}`);
+            elements.forEach(el => {
+                if (isVisible) {
+                    el.classList.remove('col-hidden');
+                } else {
+                    el.classList.add('col-hidden');
+                }
+            });
+
+            // Save column preference
+            saveColumnVisibility();
+        }
+
+        function saveColumnVisibility() {
+            const colStates = {};
+            for (let i = 1; i <= 5; i++) {
+                const toggle = document.getElementById(`toggle-col-${i}`);
+                if (toggle) {
+                    colStates[i] = toggle.checked;
+                }
+            }
+            localStorage.setItem(COLUMNS_KEY, JSON.stringify(colStates));
+        }
+
+        function loadColumnVisibility() {
+            const saved = localStorage.getItem(COLUMNS_KEY);
+            if (!saved) return;
+
+            try {
+                const colStates = JSON.parse(saved);
+                Object.keys(colStates).forEach(colIndex => {
+                    const isVisible = colStates[colIndex];
+                    const toggle = document.getElementById(`toggle-col-${colIndex}`);
+                    if (toggle) {
+                        toggle.checked = isVisible;
+                        toggleColumn(colIndex, isVisible);
+                    }
+                });
+            } catch (e) {
+                console.error("Error loading column visibility preferences", e);
+            }
+        }
+
+        function updateDaysRemaining() {
+            const targetDate = new Date('2026-10-07T00:00:00');
+            const currentDate = new Date();
+            
+            targetDate.setHours(0, 0, 0, 0);
+            currentDate.setHours(0, 0, 0, 0);
+
+            const diffTime = targetDate - currentDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const element = document.getElementById('days-remaining');
+            if (!element) return;
+
+            let text = '';
+            if (diffDays > 0) {
+                if (diffDays === 1) {
+                    text = 'متبقي يوم واحد على الاختبار';
+                } else if (diffDays === 2) {
+                    text = 'متبقي يومين على الاختبار';
+                } else if (diffDays >= 3 && diffDays <= 10) {
+                    text = `متبقي ${diffDays} أيام على الاختبار`;
+                } else {
+                    text = `متبقي ${diffDays} يوم على الاختبار`;
+                }
+            } else if (diffDays === 0) {
+                text = 'موعد الاختبار اليوم!';
+            } else {
+                text = 'انتهى موعد الاختبار';
+            }
+
+            element.textContent = text;
+        }
+
+        function cycleCheckboxState(element) {
+            let currentState = element.getAttribute('data-state') || '';
+            let nextIndex = (STATES.indexOf(currentState) + 1) % STATES.length;
+            let nextState = STATES[nextIndex];
+
+            applyStateToElement(element, nextState);
+            saveStates();
+            calculateProgress();
+        }
+
+        function applyStateToElement(element, state) {
+            element.setAttribute('data-state', state);
+            element.classList.remove('state-done', 'state-postponed', 'state-review');
+
+            if (state === 'done') {
+                element.classList.add('state-done');
+                element.textContent = '✓';
+            } else if (state === 'postponed') {
+                element.classList.add('state-postponed');
+                element.textContent = 'L';
+            } else if (state === 'review') {
+                element.classList.add('state-review');
+                element.textContent = '!';
+            } else {
+                element.textContent = '';
+            }
+        }
+
+        function saveStates() {
+            const checkboxes = document.querySelectorAll('.manual-checkbox');
+            const data = {};
+            checkboxes.forEach(cb => {
+                if (cb.id) {
+                    data[cb.id] = cb.getAttribute('data-state') || '';
+                }
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function loadSavedStates() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+
+            try {
+                const data = JSON.parse(saved);
+                Object.keys(data).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && data[id]) {
+                        applyStateToElement(el, data[id]);
+                    }
+                });
+            } catch (e) {
+                console.error("Error loading saved progress", e);
+            }
+        }
+
+        function loadSavedNotes() {
+            const notes = localStorage.getItem(NOTES_KEY);
+            if (notes) {
+                document.getElementById('user-notes').value = notes;
+            }
+        }
+
+        function resetAllProgress() {
+            __ask("هل أنت تأكد من إعـادة ضبط جميع المربعات ومسح التقدم؟", function () {
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(NOTES_KEY);
+                document.querySelectorAll('.manual-checkbox').forEach(cb => {
+                    applyStateToElement(cb, '');
+                });
+                document.getElementById('user-notes').value = '';
+                calculateProgress();
+            });
+        }
+
+        function calculateProgress() {
+            const allCheckboxes = document.querySelectorAll('.manual-checkbox');
+            let total = allCheckboxes.length;
+            let doneCount = 0;
+
+            let quantTotal = 0, quantDone = 0;
+            let bankTotal = 0, bankDone = 0;
+            let itqanTotal = 0, itqanDone = 0;
+            let zeitounaTotal = 0, zeitounaDone = 0;
+            let crashTotal = 0, crashDone = 0;
+
+            allCheckboxes.forEach(cb => {
+                const id = cb.id || '';
+                const state = cb.getAttribute('data-state') || '';
+
+                if (state === 'done') doneCount++;
+
+                if (id.includes('_c1')) {
+                    quantTotal++;
+                    if (state === 'done') quantDone++;
+                } else if (id.includes('_c2')) {
+                    bankTotal++;
+                    if (state === 'done') bankDone++;
+                } else if (id.includes('_c3')) {
+                    itqanTotal++;
+                    if (state === 'done') itqanDone++;
+                } else if (id.includes('_c5')) {
+                    zeitounaTotal++;
+                    if (state === 'done') zeitounaDone++;
+                } else if (id.includes('_c4')) {
+                    crashTotal++;
+                    if (state === 'done') crashDone++;
+                }
+            });
+
+            const overallPct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+            document.getElementById('overall-percentage').textContent = overallPct + '%';
+
+            document.getElementById('bar-quant').style.width = (quantTotal > 0 ? Math.round((quantDone / quantTotal) * 100) : 0) + '%';
+            document.getElementById('bar-bank').style.width = (bankTotal > 0 ? Math.round((bankDone / bankTotal) * 100) : 0) + '%';
+            document.getElementById('bar-itqan').style.width = (itqanTotal > 0 ? Math.round((itqanDone / itqanTotal) * 100) : 0) + '%';
+            document.getElementById('bar-zeitouna').style.width = (zeitounaTotal > 0 ? Math.round((zeitounaDone / zeitounaTotal) * 100) : 0) + '%';
+            document.getElementById('bar-crash').style.width = (crashTotal > 0 ? Math.round((crashDone / crashTotal) * 100) : 0) + '%';
+        }
+    </script>
+</body>
+</html>
