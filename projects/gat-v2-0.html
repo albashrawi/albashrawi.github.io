@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+<script>
+(function(){
+  try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}
+  catch(e){var m={};var st={getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null}};try{Object.defineProperty(window,'localStorage',{value:st,configurable:true});}catch(e2){}}
+  function modal(msg,buttons){
+    var o=document.createElement('div');
+    o.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl;font-family:inherit';
+    var c=document.createElement('div');
+    c.style.cssText='background:#fff;color:#111;border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.35);line-height:1.8;font-size:16px';
+    var p=document.createElement('div');p.textContent=msg;p.style.marginBottom='18px';c.appendChild(p);
+    var r=document.createElement('div');r.style.cssText='display:flex;gap:10px;justify-content:flex-start';
+    buttons.forEach(function(b){var x=document.createElement('button');x.textContent=b.t;x.style.cssText='padding:8px 20px;border-radius:10px;border:0;font:inherit;cursor:pointer;background:'+(b.p?'#2563eb':'#e5e7eb')+';color:'+(b.p?'#fff':'#111');x.onclick=function(){o.remove();if(b.f)b.f();};r.appendChild(x);});
+    c.appendChild(r);o.appendChild(c);document.body.appendChild(o);
+  }
+  window.alert=function(msg){modal(String(msg),[{t:'حسنًا',p:true}]);};
+  window.__ask=function(msg,yes){modal(String(msg),[{t:'نعم',p:true,f:yes},{t:'إلغاء'}]);};
+})();
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم وتتبع خطة مذاكرة القدرات — v2.0</title>
+    
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0F172A',      // أزرق كحلي داكن جداً
+                        cardbg: '#1E293B',      // كحلي رمادي
+                        cardborder: '#334155',  // حد خفيف
+                        accentEmerald: '#10B981', // أخضر زمردي
+                        accentViolet: '#8B5CF6',  // بنفسجي ليليكي
+                        accentSky: '#0EA5E9',
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F172A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10B981;
+        }
+
+        /* Checkbox Custom Styles */
+        .custom-checkbox {
+            appearance: none;
+            background-color: #0F172A;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.25em;
+            height: 1.25em;
+            border: 2px solid #475569;
+            border-radius: 0.35em;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .custom-checkbox::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em #FFFFFF;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .custom-checkbox:checked {
+            background-color: #10B981;
+            border-color: #10B981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+        .custom-checkbox:checked::before {
+            transform: scale(1);
+        }
+
+        /* Glassmorphic card effect */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Active tab underline glow */
+        .active-tab {
+            border-bottom: 3px solid #10B981;
+            color: #10B981 !important;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .completed-card {
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(16, 185, 129, 0.05)) !important;
+        }
+
+        /* Pulse glow animation for high achievements */
+        @keyframes subtleGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.15); }
+            50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.35); }
+        }
+        .glow-completed {
+            animation: subtleGlow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12 antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- Top Header -->
+    <header class="sticky top-0 z-40 bg-darkbg/90 backdrop-blur-md border-b border-cardborder shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-accentEmerald to-accentViolet flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-[#000] fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold text-white tracking-wide flex items-center gap-2">
+                            لوحة متابعة القدرات
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-accentEmerald border border-emerald-500/20">خطة مكثفة</span>
+                        </h1>
+                        <p class="text-xs text-slate-400">إتقان + فهرس الزيتونة الكامل (139 قسمًا) + كراش كورس إيهاب</p>
+                    </div>
+                </div>
+
+                <!-- Quick Action Buttons for Mobile -->
+                <div class="flex md:hidden items-center gap-2">
+                    <button onclick="confirmReset()" title="إعادة ضبط التقدم" class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all text-xs">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Global Action Controls -->
+            <div class="hidden md:flex items-center gap-3">
+                <button onclick="scrollToToday()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-cardborder text-xs font-medium flex items-center gap-2 transition-all hover:border-accentEmerald/50">
+                    <i class="fa-solid fa-calendar-day text-accentEmerald"></i>
+                    الانتقال لليوم الحالي
+                </button>
+                <button onclick="exportSummary()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-cardborder text-xs font-medium flex items-center gap-2 transition-all hover:border-accentViolet/50">
+                    <i class="fa-solid fa-print text-accentViolet"></i>
+                    طباعة / حفظ التقرير
+                </button>
+                <button onclick="confirmReset()" class="px-3.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-medium flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    إعادة ضبط الكلية
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+
+        <!-- Top Analytics & Progress Overview Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+            
+            <!-- Stat Cards Column (7 cols) -->
+            <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-2 gap-4">
+                
+                <!-- Stat Card 1: Total Progress % -->
+                <div class="col-span-2 glass-card rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/30 transition-all shadow-xl">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-all"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">نسبة الإنجاز الإجمالية</span>
+                        <span id="overallBadge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-500/10 text-accentEmerald border border-emerald-500/20">0%</span>
+                    </div>
+                    <div class="flex items-baseline gap-3 mb-3">
+                        <span id="overallPercentage" class="text-4xl sm:text-5xl font-black text-white tracking-tight">0%</span>
+                        <span class="text-xs text-slate-400" id="motivationalMsg">ابدأ خطتك بثبات وتوكل على الله!</span>
+                    </div>
+                    <!-- Live Progress Bar -->
+                    <div class="w-full bg-slate-900 rounded-full h-3.5 overflow-hidden p-0.5 border border-slate-700/50">
+                        <div id="overallProgressBar" class="bg-gradient-to-r from-accentEmerald via-teal-400 to-accentViolet h-full rounded-full transition-all duration-700 ease-out w-0 shadow-lg shadow-emerald-500/50"></div>
+                    </div>
+                </div>
+
+                <!-- Stat Card 2: Daily Tasks Progress -->
+                <div class="glass-card rounded-2xl p-4 relative overflow-hidden border border-cardborder hover:border-slate-600 transition-all">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">مهام جدول الأيام</span>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-accentEmerald flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-white mb-1" id="dailyTasksStat">0 / 0</div>
+                    <p class="text-[11px] text-slate-400" id="dailyTasksSub">0% مكتمل من المهام اليومية</p>
+                </div>
+
+                <!-- Stat Card 3: Zaytouna Sections Progress -->
+                <div class="glass-card rounded-2xl p-4 relative overflow-hidden border border-cardborder hover:border-slate-600 transition-all">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">أقسام الزيتونة (139)</span>
+                        <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-accentViolet flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-book-bookmark"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-white mb-1" id="zaytounaStat">0 / 139</div>
+                    <p class="text-[11px] text-slate-400" id="zaytounaSub">0% من الفهرس الكامل</p>
+                </div>
+
+                <!-- Phase Progress Breakdown Mini Cards -->
+                <div class="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="bg-slate-800/60 rounded-xl p-3 border border-cardborder/60">
+                        <div class="flex justify-between items-center text-xs mb-1.5">
+                            <span class="text-slate-300 font-medium">المرحلة 1: (25 سبتمبر - 04 أكتوبر)</span>
+                            <span id="phase1Text" class="font-bold text-accentEmerald">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-2">
+                            <div id="phase1Bar" class="bg-accentEmerald h-2 rounded-full transition-all duration-500 w-0"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/60 rounded-xl p-3 border border-cardborder/60">
+                        <div class="flex justify-between items-center text-xs mb-1.5">
+                            <span class="text-slate-300 font-medium">المرحلة 2: (05 - 06 أكتوبر)</span>
+                            <span id="phase2Text" class="font-bold text-accentViolet">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-2">
+                            <div id="phase2Bar" class="bg-accentViolet h-2 rounded-full transition-all duration-500 w-0"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Chart Column (5 cols) -->
+            <div class="lg:col-span-5 glass-card rounded-2xl p-5 border border-cardborder flex flex-col justify-between items-center relative">
+                <div class="w-full flex justify-between items-center mb-2">
+                    <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-accentEmerald"></i>
+                        التوزيع البياني المباشر للإنجاز
+                    </h2>
+                    <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">تحديث فوري</span>
+                </div>
+                
+                <div class="relative w-full max-w-[220px] aspect-square my-2 flex items-center justify-center">
+                    <canvas id="progressChart"></canvas>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span id="chartCenterText" class="text-2xl font-black text-white">0%</span>
+                        <span class="text-[10px] text-slate-400">إجمالي المكتمل</span>
+                    </div>
+                </div>
+
+                <!-- Custom Chart Legend -->
+                <div class="w-full grid grid-cols-2 gap-2 text-xs pt-3 border-t border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                        <span class="text-slate-300">المهام المكتملة</span>
+                    </div>
+                    <div class="flex items-center gap-2 justify-end">
+                        <span class="w-3 h-3 rounded-full bg-slate-700 inline-block"></span>
+                        <span class="text-slate-400">المهام المتبقية</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Tabs Navigation Bar -->
+        <div class="flex items-center justify-between border-b border-cardborder mb-6">
+            <div class="flex gap-2 overflow-x-auto pb-px">
+                <button onclick="switchTab('daily')" id="tabBtnDaily" class="active-tab px-5 py-3 rounded-t-xl text-sm font-bold flex items-center gap-2.5 transition-all whitespace-nowrap">
+                    <i class="fa-solid fa-calendar-days text-base"></i>
+                    <span>الجدول اليومي الزمني</span>
+                    <span id="days-remaining" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">جاري الحساب...</span>
+                </button>
+                <button onclick="switchTab('zaytouna')" id="tabBtnZaytouna" class="px-5 py-3 text-slate-400 hover:text-slate-200 rounded-t-xl text-sm font-bold flex items-center gap-2.5 transition-all whitespace-nowrap">
+                    <i class="fa-solid fa-book-open text-base"></i>
+                    <span>فهرس الزيتونة الكامل</span>
+                    <span id="zaytounaCountBadge" class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-accentViolet border border-purple-500/30">139 قسمًا</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 1: DAILY SCHEDULE CONTAINER -->
+        <div id="tabDailyContainer" class="space-y-6">
+            
+            <!-- Controls & Phase Filter -->
+            <div class="glass-card p-4 rounded-xl flex flex-wrap items-center justify-between gap-3 border border-cardborder">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-bold text-slate-400 ml-2"><i class="fa-solid fa-filter text-accentEmerald"></i> تصفية الأيام:</span>
+                    <button onclick="filterSchedule('all')" id="filterAll" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-white shadow-sm">الكل (12 يوم)</button>
+                    <button onclick="filterSchedule('phase1')" id="filterP1" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المرحلة الأولى (10 أيام)</button>
+                    <button onclick="filterSchedule('phase2')" id="filterP2" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المرحلة الثانية (يومان)</button>
+                    <button onclick="filterSchedule('pending')" id="filterPending" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">غير المكتملة</button>
+                </div>
+
+                <div class="text-xs text-slate-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> مكتمل بالكامل
+                    <span class="w-2.5 h-2.5 rounded-full bg-slate-700 mr-2"></span> جاري العمل
+                </div>
+            </div>
+
+            <!-- Daily Cards Grid -->
+            <div id="dailyScheduleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+                <!-- Injected via JavaScript -->
+            </div>
+
+        </div>
+
+
+        <!-- TAB 2: FULL ZAYTOUNA INDEX CONTAINER -->
+        <div id="tabZaytounaContainer" class="hidden space-y-6">
+            
+            <!-- Search & Controls Bar -->
+            <div class="glass-card p-5 rounded-2xl border border-cardborder space-y-4">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                    <!-- Search Input -->
+                    <div class="lg:col-span-6 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="zaytounaSearchInput" oninput="handleZaytounaSearch()" placeholder="ابحث باسم القسم أو رقم الصفحة (مثال: كينيا، الزلازل، 110)..." 
+                               class="w-full pl-10 pr-10 py-2.5 bg-slate-900/90 border border-cardborder rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-accentEmerald transition-all shadow-inner">
+                        <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Zaytouna Status Filter -->
+                    <div class="lg:col-span-6 flex items-center gap-2 flex-wrap justify-start lg:justify-end">
+                        <button onclick="filterZaytouna('all')" id="zFilterAll" class="z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-accentViolet text-white">الكل (139)</button>
+                        <button onclick="filterZaytouna('completed')" id="zFilterCompleted" class="z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المكتملة</button>
+                        <button onclick="filterZaytouna('pending')" id="zFilterPending" class="z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المتبقية</button>
+                        
+                        <div class="h-4 w-px bg-slate-700 my-auto mx-1"></div>
+
+                        <!-- View Switcher -->
+                        <div class="flex items-center bg-slate-900 rounded-lg p-0.5 border border-slate-700">
+                            <button onclick="setZaytounaView('table')" id="btnViewTable" class="px-2.5 py-1 rounded-md text-xs font-medium text-emerald-400 bg-slate-800 shadow">
+                                <i class="fa-solid fa-table-list"></i>
+                            </button>
+                            <button onclick="setZaytounaView('grid')" id="btnViewGrid" class="px-2.5 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-white">
+                                <i class="fa-solid fa-grip"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Range Jump Buttons -->
+                <div class="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-800/80 text-xs">
+                    <span class="text-slate-400 font-medium"><i class="fa-solid fa-bolt text-amber-400"></i> قفز سريع للمجموعات:</span>
+                    <button onclick="jumpToZaytounaRange(1, 30)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">1 - 30</button>
+                    <button onclick="jumpToZaytounaRange(31, 70)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">31 - 70</button>
+                    <button onclick="jumpToZaytounaRange(71, 110)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">71 - 110</button>
+                    <button onclick="jumpToZaytounaRange(111, 139)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">111 - 139 (الختام)</button>
+                    
+                    <div class="mr-auto text-slate-400 text-xs" id="matchingCountText">عرض 139 قسم</div>
+                </div>
+
+            </div>
+
+            <!-- Zaytouna View Display Container -->
+            <div id="zaytounaDisplayArea" class="space-y-4">
+                <!-- Dynamically rendered Table or Grid -->
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Confirmation Modal for Reset -->
+    <div id="resetModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full rounded-2xl p-6 border border-red-500/30 shadow-2xl space-y-4 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white">تأكيد إعادة ضبط التقدم</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                هل أنت تأكد من رغبتك في مسح كافة التحديدات والتقدم المكتمل؟ سيتم إعادة جميع المهام وأقسام الزيتونة إلى الحالة الأصلية (غير مكتملة).
+            </p>
+            <div class="flex items-center gap-3 pt-2">
+                <button onclick="executeReset()" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition-all shadow-lg shadow-red-600/30">
+                    نعم، إعـادة الضبط
+                </button>
+                <button onclick="closeResetModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-cardborder transition-all">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Popup -->
+    <div id="toastNotification" class="fixed bottom-5 left-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="glass-card border border-emerald-500/40 bg-slate-900/95 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+            <div id="toastIcon" class="w-8 h-8 rounded-lg bg-emerald-500/20 text-accentEmerald flex items-center justify-center text-sm">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <div>
+                <h4 id="toastTitle" class="text-xs font-bold text-white">تم الحفظ</h4>
+                <p id="toastBody" class="text-[11px] text-slate-300">تم تحديث الإحصائيات تلقائياً</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const zaytounaData = [
+            {"id": 1, "title": "كينيا وفضل الطيبة", "page": 7},
+            {"id": 2, "title": "الزلازل والسكري", "page": 11},
+            {"id": 3, "title": "الترجمة والرياضة", "page": 15},
+            {"id": 4, "title": "الرشاشات وعمالة الأطفال", "page": 18},
+            {"id": 5, "title": "النمل وترتيب العلماء", "page": 23},
+            {"id": 6, "title": "مالك والقناعة", "page": 27},
+            {"id": 7, "title": "الكافيين والإنسان المدني", "page": 31},
+            {"id": 8, "title": "الزيت", "page": 34},
+            {"id": 9, "title": "الأديب وفصول السنة", "page": 37},
+            {"id": 10, "title": "ياقوت الحموي والصفدي", "page": 40},
+            {"id": 11, "title": "الانزيمات والقراءة", "page": 43},
+            {"id": 12, "title": "التقاويم وآثار الفضاء", "page": 47},
+            {"id": 13, "title": "التربية والزعفران", "page": 51},
+            {"id": 14, "title": "الأحذية والتخزين", "page": 55},
+            {"id": 15, "title": "التوحيدي والعالم الافتراضي", "page": 59},
+            {"id": 16, "title": "المعادلة الظالمة والاعتزاز بالنفس", "page": 63},
+            {"id": 17, "title": "الجمل والطحالب", "page": 67},
+            {"id": 18, "title": "الصفدي ووصف الجندي", "page": 71},
+            {"id": 19, "title": "الجغرافيا الطبيعية والسمنة", "page": 74},
+            {"id": 20, "title": "الحج والسدود", "page": 78},
+            {"id": 21, "title": "الانزيمات والمماليك", "page": 81},
+            {"id": 22, "title": "الألواح الشمسية والانفلونزا", "page": 85},
+            {"id": 23, "title": "الهدية والنفط", "page": 89},
+            {"id": 24, "title": "البكتيريا والمطرقة", "page": 93},
+            {"id": 25, "title": "المحاولة شرف والمبادرة بالأعمال", "page": 96},
+            {"id": 26, "title": "تلمسان وضبط المجرم", "page": 100},
+            {"id": 27, "title": "الإنسان السعيد والفراسة", "page": 104},
+            {"id": 28, "title": "المشكلات والرحمة", "page": 107},
+            {"id": 29, "title": "الورق وكينيا", "page": 110},
+            {"id": 30, "title": "الزعفران والقصة القصيرة", "page": 114},
+            {"id": 31, "title": "البصمة والحواس", "page": 117},
+            {"id": 32, "title": "التنمية والنمو والرضاعة", "page": 121},
+            {"id": 33, "title": "روسيا وكسوة الكعبة", "page": 125},
+            {"id": 34, "title": "الحياة الفطرية والانفجار السكاني", "page": 129},
+            {"id": 35, "title": "النمل الأبيض", "page": 133},
+            {"id": 36, "title": "أبو بكر الرازي وتنظيم الوقت", "page": 136},
+            {"id": 37, "title": "واقع التعليم ونبي الرحمة", "page": 140},
+            {"id": 38, "title": "الأديب والتطوع", "page": 143},
+            {"id": 39, "title": "كسوة الكعبة والعمل عن بعد", "page": 147},
+            {"id": 40, "title": "المكاتبة والربع الخالي", "page": 151},
+            {"id": 41, "title": "المافيا واللغة العربية", "page": 155},
+            {"id": 42, "title": "الحجامة والوقت", "page": 159},
+            {"id": 43, "title": "البطاطس", "page": 163},
+            {"id": 44, "title": "طلاقة الوجه والخضراوات", "page": 166},
+            {"id": 45, "title": "عوامل الحسم وكيفية بيع الأرض", "page": 170},
+            {"id": 46, "title": "آثار الفضاء ومعركة اليرموك", "page": 174},
+            {"id": 47, "title": "المواد الدراسية", "page": 178},
+            {"id": 48, "title": "الكريم واللئيم ولذة العبادة", "page": 182},
+            {"id": 49, "title": "اليأس والشجاع", "page": 185},
+            {"id": 50, "title": "الواقع الافتراضي والأكسجين", "page": 188},
+            {"id": 51, "title": "التلفاز وإيطاليا واليابان", "page": 192},
+            {"id": 52, "title": "النفط والتقاويم", "page": 196},
+            {"id": 53, "title": "تسونامي وغلاف الجوي", "page": 200},
+            {"id": 54, "title": "التصحيح والحسد", "page": 204},
+            {"id": 55, "title": "الأدب والبراهين", "page": 208},
+            {"id": 56, "title": "القلق والطفل", "page": 211},
+            {"id": 57, "title": "قضم الأظافر والشيخوخة", "page": 215},
+            {"id": 58, "title": "التفاؤل والمقابلة", "page": 218},
+            {"id": 59, "title": "التمرّكز والفوليك", "page": 222},
+            {"id": 60, "title": "البخاري والرازي", "page": 228},
+            {"id": 61, "title": "تلاشي المستقبل والرجولة", "page": 232},
+            {"id": 62, "title": "المراهقين والتفاؤل", "page": 236},
+            {"id": 63, "title": "الهاتف والفنانين", "page": 240},
+            {"id": 64, "title": "المأمون والنفط", "page": 244},
+            {"id": 65, "title": "الندم وااختلاف العقول", "page": 247},
+            {"id": 66, "title": "التشخيص والمافيا", "page": 250},
+            {"id": 67, "title": "العطش وتحمل المتاعب", "page": 254},
+            {"id": 68, "title": "الوطواط والمسك", "page": 257},
+            {"id": 69, "title": "الازدواجية اللغوية", "page": 260},
+            {"id": 70, "title": "دوار الشمس والنخل", "page": 264},
+            {"id": 71, "title": "التعليم والتضاريس", "page": 268},
+            {"id": 72, "title": "كينيا والشاي", "page": 272},
+            {"id": 73, "title": "المدرسة المونستيرية", "page": 276},
+            {"id": 74, "title": "الانزيمات وفيتامين د", "page": 280},
+            {"id": 75, "title": "البرازيل والأشعة السينية", "page": 284},
+            {"id": 76, "title": "التنقيب عن النفط", "page": 288},
+            {"id": 77, "title": "الجيوش والزلازل", "page": 292},
+            {"id": 78, "title": "الغواصة الروسية والمنتديات", "page": 296},
+            {"id": 79, "title": "جاما والمكتشفات البحرية", "page": 299},
+            {"id": 80, "title": "الجدري وقياس الرأي العام", "page": 303},
+            {"id": 81, "title": "التجارة الالكترونية والنفط", "page": 306},
+            {"id": 82, "title": "القراءة وطريق الخير", "page": 310},
+            {"id": 83, "title": "الأهلة والاختيار السليم", "page": 313},
+            {"id": 84, "title": "الحرانكش والبحر الميت", "page": 316},
+            {"id": 85, "title": "زحل والتالف", "page": 321},
+            {"id": 86, "title": "حشرة السمك والتهاب اللوزتين", "page": 324},
+            {"id": 87, "title": "التواضع وحلم الطفل", "page": 327},
+            {"id": 88, "title": "المنظمات والفضاء", "page": 330},
+            {"id": 89, "title": "الشركات الامريكية والعقاقير", "page": 334},
+            {"id": 90, "title": "الأوروبيون والأزياء", "page": 338},
+            {"id": 91, "title": "التوحد والتمور", "page": 342},
+            {"id": 92, "title": "المنظمات الراغب بالنجاح", "page": 346},
+            {"id": 93, "title": "القراءة", "page": 350},
+            {"id": 94, "title": "الشوكولاته", "page": 353},
+            {"id": 95, "title": "الشجاعة", "page": 357},
+            {"id": 96, "title": "ابن فارس", "page": 360},
+            {"id": 97, "title": "الأسواق المالية", "page": 363},
+            {"id": 98, "title": "السمنة", "page": 366},
+            {"id": 99, "title": "الرياح الموسمية", "page": 369},
+            {"id": 100, "title": "التعصب الرياضي", "page": 372},
+            {"id": 101, "title": "الثقة بالله", "page": 375},
+            {"id": 102, "title": "الهدية", "page": 378},
+            {"id": 103, "title": "نظام الويندوز", "page": 381},
+            {"id": 104, "title": "السيوف", "page": 384},
+            {"id": 105, "title": "المرداوي", "page": 387},
+            {"id": 106, "title": "عبد الله بن عباس", "page": 390},
+            {"id": 107, "title": "شجرة الزيتون", "page": 393},
+            {"id": 108, "title": "اينشتاين", "page": 396},
+            {"id": 109, "title": "احسان النية", "page": 399},
+            {"id": 110, "title": "اللؤلؤ والرشاشات", "page": 402},
+            {"id": 111, "title": "تشستر كارلسون", "page": 405},
+            {"id": 112, "title": "سيء الظن", "page": 408},
+            {"id": 113, "title": "الصقور والخسائر الاقتصادية", "page": 411},
+            {"id": 114, "title": "القطب الجنوبي", "page": 415},
+            {"id": 115, "title": "دودة القز", "page": 418},
+            {"id": 116, "title": "الجاحظ", "page": 421},
+            {"id": 117, "title": "الشعر", "page": 424},
+            {"id": 118, "title": "السجن والدعوة الى الله", "page": 427},
+            {"id": 119, "title": "الحزم", "page": 430},
+            {"id": 120, "title": "النفط والسمنة", "page": 433},
+            {"id": 121, "title": "الدعوة الى الله", "page": 436},
+            {"id": 122, "title": "التوحيد", "page": 439},
+            {"id": 123, "title": "الأخطار الاقتصادية", "page": 442},
+            {"id": 124, "title": "الاحتراق الوظيفي", "page": 445},
+            {"id": 125, "title": "جامعة الملك سعود", "page": 448},
+            {"id": 126, "title": "التخطيط", "page": 451},
+            {"id": 127, "title": "التعدين", "page": 454},
+            {"id": 128, "title": "تعدد الأوجه والرعي البيئي", "page": 457},
+            {"id": 129, "title": "التمر", "page": 460},
+            {"id": 130, "title": "النفس", "page": 463},
+            {"id": 131, "title": "البيولوجيا الصناعية", "page": 466},
+            {"id": 132, "title": "حضارة أمريكا واليابان", "page": 469},
+            {"id": 133, "title": "الرواية", "page": 472},
+            {"id": 134, "title": "المناخ", "page": 474},
+            {"id": 135, "title": "الرؤيا والبحر الميت", "page": 476},
+            {"id": 136, "title": "الغواصة الروسية والازدواجية", "page": 478},
+            {"id": 137, "title": "الألوان", "page": 481},
+            {"id": 138, "title": "العصافير", "page": 483},
+            {"id": 139, "title": "القمر", "page": 485}
+        ];
+
+        const dailySchedule = [
+            // Phase 1
+            {
+                id: "day_1",
+                dateStr: "25 سبتمبر",
+                dayName: "الأربعاء",
+                phase: 1,
+                isoDate: "2026-09-25",
+                tasks: [
+                    { id: "d1_t1", title: "إتقان - الأقسام الحمراء (مقاطع 1-10)", category: "itqan" },
+                    { id: "d1_t2", title: "الزيتونة (أقسام 1-14)", category: "zaytouna", zRange: [1, 14] }
+                ]
+            },
+            {
+                id: "day_2",
+                dateStr: "26 سبتمبر",
+                dayName: "الخميس",
+                phase: 1,
+                isoDate: "2026-09-26",
+                tasks: [
+                    { id: "d2_t1", title: "إتقان - الأقسام الحمراء (مقاطع 11-20)", category: "itqan" },
+                    { id: "d2_t2", title: "الزيتونة (أقسام 15-28)", category: "zaytouna", zRange: [15, 28] }
+                ]
+            },
+            {
+                id: "day_3",
+                dateStr: "27 سبتمبر",
+                dayName: "الجمعة",
+                phase: 1,
+                isoDate: "2026-09-27",
+                tasks: [
+                    { id: "d3_t1", title: "إتقان - الأقسام الحمراء (مقاطع 21-30)", category: "itqan" },
+                    { id: "d3_t2", title: "الزيتونة (أقسام 29-42)", category: "zaytouna", zRange: [29, 42] }
+                ]
+            },
+            {
+                id: "day_4",
+                dateStr: "28 سبتمبر",
+                dayName: "السبت",
+                phase: 1,
+                isoDate: "2026-09-28",
+                tasks: [
+                    { id: "d4_t1", title: "إتقان - الأقسام الحمراء (مقاطع 31-40)", category: "itqan" },
+                    { id: "d4_t2", title: "الزيتونة (أقسام 43-56)", category: "zaytouna", zRange: [43, 56] }
+                ]
+            },
+            {
+                id: "day_5",
+                dateStr: "29 سبتمبر",
+                dayName: "الأحد",
+                phase: 1,
+                isoDate: "2026-09-29",
+                tasks: [
+                    { id: "d5_t1", title: "إتقان - الأقسام الحمراء (مقاطع 41-50)", category: "itqan" },
+                    { id: "d5_t2", title: "الزيتونة (أقسام 57-70)", category: "zaytouna", zRange: [57, 70] }
+                ]
+            },
+            {
+                id: "day_6",
+                dateStr: "30 سبتمبر",
+                dayName: "الإثنين",
+                phase: 1,
+                isoDate: "2026-09-30",
+                tasks: [
+                    { id: "d6_t1", title: "إتقان - الأقسام الحمراء (مقاطع 51-62)", category: "itqan" },
+                    { id: "d6_t2", title: "الزيتونة (أقسام 71-84)", category: "zaytouna", zRange: [71, 84] }
+                ]
+            },
+            {
+                id: "day_7",
+                dateStr: "01 أكتوبر",
+                dayName: "الثلاثاء",
+                phase: 1,
+                isoDate: "2026-10-01",
+                tasks: [
+                    { id: "d7_t1", title: "إتقان - الأقسام الحمراء (مقاطع 63-75)", category: "itqan" },
+                    { id: "d7_t2", title: "الزيتونة (أقسام 85-98)", category: "zaytouna", zRange: [85, 98] }
+                ]
+            },
+            {
+                id: "day_8",
+                dateStr: "02 أكتوبر",
+                dayName: "الأربعاء",
+                phase: 1,
+                isoDate: "2026-10-02",
+                tasks: [
+                    { id: "d8_t1", title: "إتقان - الأقسام الحمراء (مقاطع 76-88)", category: "itqan" },
+                    { id: "d8_t2", title: "الزيتونة (أقسام 99-112)", category: "zaytouna", zRange: [99, 112] }
+                ]
+            },
+            {
+                id: "day_9",
+                dateStr: "03 أكتوبر",
+                dayName: "الخميس",
+                phase: 1,
+                isoDate: "2026-10-03",
+                tasks: [
+                    { id: "d9_t1", title: "إتقان - الأقسام الحمراء (مقاطع 89-102)", category: "itqan" },
+                    { id: "d9_t2", title: "الزيتونة (أقسام 113-126)", category: "zaytouna", zRange: [113, 126] },
+                    { id: "d9_t3", title: "إيهاب - الكراش كورس (اليوم الأول)", category: "ehab" }
+                ]
+            },
+            {
+                id: "day_10",
+                dateStr: "04 أكتوبر",
+                dayName: "الجمعة",
+                phase: 1,
+                isoDate: "2026-10-04",
+                tasks: [
+                    { id: "d10_t1", title: "مراجعة أخطاء إتقان", category: "revision" },
+                    { id: "d10_t2", title: "الزيتونة (أقسام 127-139 الختام)", category: "zaytouna", zRange: [127, 139] },
+                    { id: "d10_t3", title: "إيهاب - الكراش كورس (اليوم الثاني والختام)", category: "ehab" }
+                ]
+            },
+            // Phase 2
+            {
+                id: "day_11",
+                dateStr: "05 أكتوبر",
+                dayName: "السبت",
+                phase: 2,
+                isoDate: "2026-10-05",
+                tasks: [
+                    { id: "d11_t1", title: "مراجعة الأقسام الأعلى تكراراً", category: "revision" },
+                    { id: "d11_t2", title: "أخطاء إتقان والزيتونة وإعادة حل ملف الأخطاء", category: "revision" },
+                    { id: "d11_t3", title: "قوانين الكمي الصعبة", category: "revision" }
+                ]
+            },
+            {
+                id: "day_12",
+                dateStr: "06 أكتوبر",
+                dayName: "الأحد",
+                phase: 2,
+                isoDate: "2026-10-06",
+                tasks: [
+                    { id: "d12_t1", title: "استذكار بصري لأهم الكلمات والتناظرات", category: "revision" },
+                    { id: "d12_t2", title: "التوقف عن المذاكرة مع العصر لإراحة الذهن", category: "rest" }
+                ]
+            }
+        ];
+
+        const STORAGE_KEY = 'qudrat_study_plan_v2';
+        
+        let appState = {
+            tasks: {},     // { taskId: true/false }
+            zaytouna: {},  // { zId: true/false }
+            currentTab: 'daily',
+            scheduleFilter: 'all',
+            zaytounaFilter: 'all',
+            zaytounaView: 'table',
+            searchQuery: ''
+        };
+
+        // Load saved state from LocalStorage
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appState.tasks = parsed.tasks || {};
+                    appState.zaytouna = parsed.zaytouna || {};
+                }
+            } catch (e) {
+                console.error("Could not load state from localStorage", e);
+            }
+        }
+
+        // Save state to LocalStorage
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    tasks: appState.tasks,
+                    zaytouna: appState.zaytouna
+                }));
+            } catch (e) {
+                console.error("Could not save state to localStorage", e);
+            }
+        }
+
+        let progressChartInstance = null;
+
+        function initChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            progressChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['المكتمل', 'المتبقي'],
+                    datasets: [{
+                        data: [0, 100],
+                        backgroundColor: ['#10B981', '#334155'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '78%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            bodyFont: { family: 'Cairo' },
+                            titleFont: { family: 'Cairo' },
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Sync Zaytouna Range <-> Daily Tasks
+        function syncBidirectional(sourceType, id, isChecked) {
+            if (sourceType === 'task') {
+                // Find task
+                let targetTask = null;
+                dailySchedule.forEach(day => {
+                    day.tasks.forEach(t => {
+                        if (t.id === id) targetTask = t;
+                    });
+                });
+
+                // If it's a zaytouna range task
+                if (targetTask && targetTask.zRange) {
+                    const [start, end] = targetTask.zRange;
+                    for (let z = start; z <= end; z++) {
+                        appState.zaytouna[z] = isChecked;
+                    }
+                }
+            } else if (sourceType === 'zaytouna') {
+                // When a Zaytouna section changes, check if any daily task's range is fully satisfied or broken
+                dailySchedule.forEach(day => {
+                    day.tasks.forEach(t => {
+                        if (t.zRange) {
+                            const [start, end] = t.zRange;
+                            let allDone = true;
+                            for (let z = start; z <= end; z++) {
+                                if (!appState.zaytouna[z]) {
+                                    allDone = false;
+                                    break;
+                                }
+                            }
+                            appState.tasks[t.id] = allDone;
+                        }
+                    });
+                });
+            }
+
+            saveState();
+            updateAllStatsAndUI();
+        }
+
+        function calculateStats() {
+            // Count daily tasks
+            let totalDaily = 0;
+            let completedDaily = 0;
+            let phase1Total = 0, phase1Completed = 0;
+            let phase2Total = 0, phase2Completed = 0;
+
+            dailySchedule.forEach(day => {
+                day.tasks.forEach(t => {
+                    totalDaily++;
+                    const isDone = !!appState.tasks[t.id];
+                    if (isDone) completedDaily++;
+
+                    if (day.phase === 1) {
+                        phase1Total++;
+                        if (isDone) phase1Completed++;
+                    } else {
+                        phase2Total++;
+                        if (isDone) phase2Completed++;
+                    }
+                });
+            });
+
+            // Count Zaytouna 139 sections
+            let totalZaytouna = 139;
+            let completedZaytouna = 0;
+            for (let i = 1; i <= 139; i++) {
+                if (appState.zaytouna[i]) completedZaytouna++;
+            }
+
+            // Weighted Overall Progress Calculation
+            // Daily tasks weight = 60%, Zaytouna Index weight = 40%
+            const dailyPct = totalDaily > 0 ? (completedDaily / totalDaily) : 0;
+            const zaytounaPct = (completedZaytouna / totalZaytouna);
+            const overallPct = Math.round((dailyPct * 0.5 + zaytounaPct * 0.5) * 100);
+
+            const p1Pct = phase1Total > 0 ? Math.round((phase1Completed / phase1Total) * 100) : 0;
+            const p2Pct = phase2Total > 0 ? Math.round((phase2Completed / phase2Total) * 100) : 0;
+
+            return {
+                totalDaily,
+                completedDaily,
+                dailyPct: Math.round(dailyPct * 100),
+                totalZaytouna,
+                completedZaytouna,
+                zaytounaPct: Math.round(zaytounaPct * 100),
+                overallPct,
+                p1Pct,
+                p2Pct
+            };
+        }
+
+        function updateAllStatsAndUI() {
+            const stats = calculateStats();
+
+            // Update main Percentage UI
+            document.getElementById('overallPercentage').innerText = `${stats.overallPct}%`;
+            document.getElementById('overallBadge').innerText = `${stats.overallPct}% مكتمل`;
+            document.getElementById('overallProgressBar').style.width = `${stats.overallPct}%`;
+            document.getElementById('chartCenterText').innerText = `${stats.overallPct}%`;
+
+            // Motivational messages
+            const msgEl = document.getElementById('motivationalMsg');
+            if (stats.overallPct === 0) msgEl.innerText = "ابدأ خطتك بثبات وتوكل على الله!";
+            else if (stats.overallPct < 30) msgEl.innerText = "بداية قوية! واصل التقدم بخطى ثابتة 🚀";
+            else if (stats.overallPct < 70) msgEl.innerText = "إنجاز رائع! أنت الآن في منتصف الطريق 💪";
+            else if (stats.overallPct < 100) msgEl.innerText = "اقتربت من القمة! استمر فالنصر قريب 🔥";
+            else msgEl.innerText = "مبارك! أتممت الخطة بنجاح باهر 🥳🎉";
+
+            // Stats cards
+            document.getElementById('dailyTasksStat').innerText = `${stats.completedDaily} / ${stats.totalDaily}`;
+            document.getElementById('dailyTasksSub').innerText = `${stats.dailyPct}% مكتمل من المهام`;
+
+            document.getElementById('zaytounaStat').innerText = `${stats.completedZaytouna} / 139`;
+            document.getElementById('zaytounaSub').innerText = `${stats.zaytounaPct}% من الفهرس الكامل`;
+
+            // Phase bars
+            document.getElementById('phase1Text').innerText = `${stats.p1Pct}%`;
+            document.getElementById('phase1Bar').style.width = `${stats.p1Pct}%`;
+
+            document.getElementById('phase2Text').innerText = `${stats.p2Pct}%`;
+            document.getElementById('phase2Bar').style.width = `${stats.p2Pct}%`;
+
+            // Update Chart
+            if (progressChartInstance) {
+                progressChartInstance.data.datasets[0].data = [stats.overallPct, 100 - stats.overallPct];
+                progressChartInstance.update();
+            }
+
+            // Re-render UI components
+            renderDailySchedule();
+            renderZaytounaIndex();
+        }
+
+        function renderDailySchedule() {
+            const grid = document.getElementById('dailyScheduleGrid');
+            grid.innerHTML = '';
+
+            const todayIso = new Date().toISOString().split('T')[0];
+
+            dailySchedule.forEach((day, index) => {
+                // Filter logic
+                if (appState.scheduleFilter === 'phase1' && day.phase !== 1) return;
+                if (appState.scheduleFilter === 'phase2' && day.phase !== 2) return;
+
+                const dayTasksTotal = day.tasks.length;
+                let dayTasksDone = 0;
+                day.tasks.forEach(t => {
+                    if (appState.tasks[t.id]) dayTasksDone++;
+                });
+
+                const isDayComplete = dayTasksTotal > 0 && dayTasksDone === dayTasksTotal;
+
+                if (appState.scheduleFilter === 'pending' && isDayComplete) return;
+
+                const isToday = day.isoDate === todayIso;
+
+                // Card Element
+                const card = document.createElement('div');
+                card.id = `card_${day.id}`;
+                card.className = `glass-card rounded-2xl p-5 border transition-all duration-300 relative overflow-hidden ${
+                    isDayComplete 
+                        ? 'completed-card glow-completed' 
+                        : isToday 
+                            ? 'border-accentEmerald/60 shadow-lg shadow-emerald-500/10 ring-1 ring-accentEmerald/30' 
+                            : 'border-cardborder hover:border-slate-600'
+                }`;
+
+                // Phase badge color
+                const phaseBadge = day.phase === 1 
+                    ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-accentEmerald border border-emerald-500/20">المرحلة الأولى</span>'
+                    : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-accentViolet border border-purple-500/20">المرحلة الثانية</span>';
+
+                let tasksHTML = '';
+                day.tasks.forEach(t => {
+                    const checked = !!appState.tasks[t.id];
+                    let catIcon = '<i class="fa-solid fa-circle-check text-slate-500"></i>';
+                    let catBadge = '';
+
+                    if (t.category === 'itqan') {
+                        catIcon = '<i class="fa-solid fa-play text-red-400"></i>';
+                        catBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">إتقان</span>';
+                    } else if (t.category === 'zaytouna') {
+                        catIcon = '<i class="fa-solid fa-book text-purple-400"></i>';
+                        catBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">الزيتونة</span>';
+                    } else if (t.category === 'ehab') {
+                        catIcon = '<i class="fa-solid fa-graduation-cap text-amber-400"></i>';
+                        catBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">إيهاب</span>';
+                    } else {
+                        catIcon = '<i class="fa-solid fa-rotate text-sky-400"></i>';
+                        catBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">مراجعة</span>';
+                    }
+
+                    // Jump button to Zaytouna
+                    let jumpBtn = '';
+                    if (t.zRange) {
+                        jumpBtn = `
+                            <button onclick="event.stopPropagation(); jumpToZaytounaTab(${t.zRange[0]}, ${t.zRange[1]})" 
+                                    title="عرض الأقسام في جدول الزيتونة" 
+                                    class="text-[11px] text-accentViolet hover:text-white bg-purple-500/10 hover:bg-purple-500/30 px-2 py-0.5 rounded border border-purple-500/20 transition-all flex items-center gap-1 ml-1">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                الفهرس
+                            </button>
+                        `;
+                    }
+
+                    tasksHTML += `
+                        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer group"
+                             onclick="toggleTask('${t.id}')">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" ${checked ? 'checked' : ''} 
+                                       class="custom-checkbox" 
+                                       onclick="event.stopPropagation(); toggleTask('${t.id}')">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-semibold ${checked ? 'line-through text-slate-500' : 'text-slate-200 group-hover:text-white'} transition-all">
+                                        ${t.title}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                ${catBadge}
+                                ${jumpBtn}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    ${isToday ? '<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-violet-500"></div>' : ''}
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-black text-white">${day.dateStr}</span>
+                            <span class="text-xs text-slate-400 font-medium">(${day.dayName})</span>
+                            ${isToday ? '<span class="text-[10px] bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full font-bold">اليوم</span>' : ''}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${phaseBadge}
+                            <span class="text-xs font-bold ${isDayComplete ? 'text-accentEmerald' : 'text-slate-400'}">
+                                ${dayTasksDone}/${dayTasksTotal}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        ${tasksHTML}
+                    </div>
+
+                    ${isDayComplete ? `
+                        <div class="mt-3 pt-2 border-t border-emerald-500/20 text-center text-[11px] font-bold text-accentEmerald flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-award text-sm"></i> تم إنجاز هذا اليوم بالكامل!
+                        </div>
+                    ` : ''}
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function renderZaytounaIndex() {
+            const area = document.getElementById('zaytounaDisplayArea');
+            area.innerHTML = '';
+
+            const query = appState.searchQuery.trim().toLowerCase();
+
+            // Filter Zaytouna Data
+            let filtered = zaytounaData.filter(item => {
+                // Search query
+                const matchesSearch = query === '' || 
+                    item.title.toLowerCase().includes(query) || 
+                    item.page.toString().includes(query) ||
+                    item.id.toString().includes(query);
+
+                if (!matchesSearch) return false;
+
+                // Status filter
+                const isChecked = !!appState.zaytouna[item.id];
+                if (appState.zaytounaFilter === 'completed' && !isChecked) return false;
+                if (appState.zaytounaFilter === 'pending' && isChecked) return false;
+
+                return true;
+            });
+
+            document.getElementById('matchingCountText').innerText = `عرض ${filtered.length} من أصل 139 قسم`;
+
+            if (filtered.length === 0) {
+                area.innerHTML = `
+                    <div class="glass-card rounded-2xl p-12 text-center text-slate-400 space-y-3">
+                        <i class="fa-solid fa-magnifying-glass text-4xl text-slate-600"></i>
+                        <h3 class="text-base font-bold text-slate-300">لم يتم العثور على نتائج طابقة</h3>
+                        <p class="text-xs">جرب البحث بكلمة أخرى أو قم بإلغاء التصفية الحالية.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (appState.zaytounaView === 'table') {
+                // Render Table View
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'glass-card rounded-2xl overflow-hidden border border-cardborder shadow-xl';
+
+                let rowsHTML = '';
+                filtered.forEach(item => {
+                    const checked = !!appState.zaytouna[item.id];
+                    rowsHTML += `
+                        <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition-all cursor-pointer ${checked ? 'bg-emerald-500/5' : ''}"
+                            onclick="toggleZaytounaSection(${item.id})">
+                            <td class="p-3 text-center w-12" onclick="event.stopPropagation()">
+                                <input type="checkbox" ${checked ? 'checked' : ''} 
+                                       class="custom-checkbox mx-auto" 
+                                       onclick="toggleZaytounaSection(${item.id})">
+                            </td>
+                            <td class="p-3 text-xs font-bold text-slate-400 w-16">#${item.id}</td>
+                            <td class="p-3 text-xs sm:text-sm font-semibold ${checked ? 'line-through text-slate-500' : 'text-slate-100'}">
+                                ${item.title}
+                            </td>
+                            <td class="p-3 text-xs font-bold text-accentViolet text-left w-24">
+                                <span class="bg-purple-500/10 px-2.5 py-1 rounded-md border border-purple-500/20">صـ ${item.page}</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableContainer.innerHTML = `
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/80 border-b border-cardborder text-xs text-slate-400">
+                                    <th class="p-3 text-center">تحديد</th>
+                                    <th class="p-3">الرقم</th>
+                                    <th class="p-3">عنوان القسم / الموضوع</th>
+                                    <th class="p-3 text-left">رقم الصفحة</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                ${rowsHTML}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                area.appendChild(tableContainer);
+
+            } else {
+                // Render Grid View
+                const gridContainer = document.createElement('div');
+                gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5';
+
+                filtered.forEach(item => {
+                    const checked = !!appState.zaytouna[item.id];
+                    const itemCard = document.createElement('div');
+                    itemCard.className = `glass-card p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                        checked ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-cardborder hover:border-slate-600'
+                    }`;
+                    itemCard.onclick = () => toggleZaytounaSection(item.id);
+
+                    itemCard.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${checked ? 'checked' : ''} 
+                                   class="custom-checkbox" 
+                                   onclick="event.stopPropagation(); toggleZaytounaSection(${item.id})">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 block">قسم #${item.id}</span>
+                                <h4 class="text-xs font-bold ${checked ? 'line-through text-slate-500' : 'text-slate-200'}">${item.title}</h4>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-accentViolet bg-purple-500/10 px-2 py-1 rounded border border-purple-500/20 whitespace-nowrap">
+                            صـ ${item.page}
+                        </span>
+                    `;
+
+                    gridContainer.appendChild(itemCard);
+                });
+
+                area.appendChild(gridContainer);
+            }
+        }
+
+        function toggleTask(taskId) {
+            const newState = !appState.tasks[taskId];
+            appState.tasks[taskId] = newState;
+            
+            // Bidirectional Sync
+            syncBidirectional('task', taskId, newState);
+            showToast(newState ? 'تم إكمال الملاحظة' : 'تم تغيير الحالة', 'تم حفظ التحديث في المتصفح');
+        }
+
+        function toggleZaytounaSection(zId) {
+            const newState = !appState.zaytouna[zId];
+            appState.zaytouna[zId] = newState;
+
+            // Bidirectional Sync
+            syncBidirectional('zaytouna', zId, newState);
+            showToast(newState ? 'تم إكمال قسم الزيتونة' : 'تم الخيار', 'تم القراءة وتحديث الإحصائيات');
+        }
+
+        function switchTab(tabName) {
+            appState.currentTab = tabName;
+
+            const btnDaily = document.getElementById('tabBtnDaily');
+            const btnZaytouna = document.getElementById('tabBtnZaytouna');
+
+            const containerDaily = document.getElementById('tabDailyContainer');
+            const containerZaytouna = document.getElementById('tabZaytounaContainer');
+
+            if (tabName === 'daily') {
+                btnDaily.className = "active-tab px-5 py-3 rounded-t-xl text-sm font-bold flex items-center gap-2.5 transition-all whitespace-nowrap";
+                btnZaytouna.className = "px-5 py-3 text-slate-400 hover:text-slate-200 rounded-t-xl text-sm font-bold flex items-center gap-2.5 transition-all whitespace-nowrap";
+
+                containerDaily.classList.remove('hidden');
+                containerZaytouna.classList.add('hidden');
+            } else {
+                btnZaytouna.className = "active-tab px-5 py-3 rounded-t-xl text-sm font-bold flex items-center gap-2.5 transition-all whitespace-nowrap";
+                btnDaily.className = "px-5 py-3 text-slate-400 hover:text-slate-200 rounded-t-xl text-sm font-bold flex items-center gap-2.5 transition-all whitespace-nowrap";
+
+                containerZaytouna.classList.remove('hidden');
+                containerDaily.classList.add('hidden');
+            }
+        }
+
+        function filterSchedule(filterType) {
+            appState.scheduleFilter = filterType;
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700";
+            });
+
+            if (filterType === 'all') document.getElementById('filterAll').className = "filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-white shadow-sm";
+            else if (filterType === 'phase1') document.getElementById('filterP1').className = "filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-white shadow-sm";
+            else if (filterType === 'phase2') document.getElementById('filterP2').className = "filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white shadow-sm";
+            else if (filterType === 'pending') document.getElementById('filterPending').className = "filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-600 text-white shadow-sm";
+
+            renderDailySchedule();
+        }
+
+        function filterZaytouna(status) {
+            appState.zaytounaFilter = status;
+
+            document.querySelectorAll('.z-filter-btn').forEach(btn => {
+                btn.className = "z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700";
+            });
+
+            if (status === 'all') document.getElementById('zFilterAll').className = "z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-accentViolet text-white";
+            else if (status === 'completed') document.getElementById('zFilterCompleted').className = "z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-white";
+            else if (status === 'pending') document.getElementById('zFilterPending').className = "z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-600 text-white";
+
+            renderZaytounaIndex();
+        }
+
+        function setZaytounaView(viewType) {
+            appState.zaytounaView = viewType;
+
+            const btnTable = document.getElementById('btnViewTable');
+            const btnGrid = document.getElementById('btnViewGrid');
+
+            if (viewType === 'table') {
+                btnTable.className = "px-2.5 py-1 rounded-md text-xs font-medium text-emerald-400 bg-slate-800 shadow";
+                btnGrid.className = "px-2.5 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-white";
+            } else {
+                btnGrid.className = "px-2.5 py-1 rounded-md text-xs font-medium text-emerald-400 bg-slate-800 shadow";
+                btnTable.className = "px-2.5 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-white";
+            }
+
+            renderZaytounaIndex();
+        }
+
+        function handleZaytounaSearch() {
+            const val = document.getElementById('zaytounaSearchInput').value;
+            appState.searchQuery = val;
+
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (val.length > 0) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+
+            renderZaytounaIndex();
+        }
+
+        function clearSearch() {
+            document.getElementById('zaytounaSearchInput').value = '';
+            appState.searchQuery = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            renderZaytounaIndex();
+        }
+
+        function jumpToZaytounaRange(start, end) {
+            filterZaytouna('all');
+            document.getElementById('zaytounaSearchInput').value = '';
+            appState.searchQuery = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+
+            switchTab('zaytouna');
+
+            setTimeout(() => {
+                const el = document.evaluate(`//td[contains(text(), '#${start}')]`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+        }
+
+        function jumpToZaytounaTab(start, end) {
+            jumpToZaytounaRange(start, end);
+            showToast(`أقسام الزيتونة (${start} - ${end})`, 'تم الانتقال والأقسام جاهزة في جدول الفهرس');
+        }
+
+        function scrollToToday() {
+            const todayIso = new Date().toISOString().split('T')[0];
+            const todayObj = dailySchedule.find(d => d.isoDate === todayIso);
+
+            switchTab('daily');
+            filterSchedule('all');
+
+            if (todayObj) {
+                setTimeout(() => {
+                    const el = document.getElementById(`card_${todayObj.id}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+            } else {
+                showToast('تنويه', 'اليوم الحالي خارج نطاق الخطة الزمني المعين');
+            }
+        }
+
+        function confirmReset() {
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        function executeReset() {
+            appState.tasks = {};
+            appState.zaytouna = {};
+            saveState();
+            closeResetModal();
+            updateAllStatsAndUI();
+            showToast('تمت إعادة الضبط', 'تم مسح كافة البيانات وسجل التقدم بنجاح');
+        }
+
+        function exportSummary() {
+            window.print();
+        }
+
+        function showToast(title, body) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastBody').innerText = body;
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        window.onload = function() {
+            loadState();
+            initChart();
+            updateAllStatsAndUI();
+updateDaysRemaining();
+        };
+
+
+function updateDaysRemaining() {
+            const targetDate = new Date('2026-10-07T00:00:00');
+            const currentDate = new Date();
+            
+            targetDate.setHours(0, 0, 0, 0);
+            currentDate.setHours(0, 0, 0, 0);
+
+            const diffTime = targetDate - currentDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const element = document.getElementById('days-remaining');
+            if (!element) return;
+
+            let text = '';
+            if (diffDays > 0) {
+                if (diffDays === 1) {
+                    text = 'متبقي يوم واحد على الاختبار';
+                } else if (diffDays === 2) {
+                    text = 'متبقي يومين على الاختبار';
+                } else if (diffDays >= 3 && diffDays <= 10) {
+                    text = `متبقي ${diffDays} أيام على الاختبار`;
+                } else {
+                    text = `متبقي ${diffDays} يوم على الاختبار`;
+                }
+            } else if (diffDays === 0) {
+                text = 'موعد الاختبار اليوم!';
+            } else {
+                text = 'انتهى موعد الاختبار';
+            }
+
+            element.textContent = text;
+        }
+
+    </script>
+</body>
+</html>

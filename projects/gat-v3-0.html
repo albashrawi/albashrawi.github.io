@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+<script>
+(function(){
+  try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}
+  catch(e){var m={};var st={getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null}};try{Object.defineProperty(window,'localStorage',{value:st,configurable:true});}catch(e2){}}
+  function modal(msg,buttons){
+    var o=document.createElement('div');
+    o.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl;font-family:inherit';
+    var c=document.createElement('div');
+    c.style.cssText='background:#fff;color:#111;border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.35);line-height:1.8;font-size:16px';
+    var p=document.createElement('div');p.textContent=msg;p.style.marginBottom='18px';c.appendChild(p);
+    var r=document.createElement('div');r.style.cssText='display:flex;gap:10px;justify-content:flex-start';
+    buttons.forEach(function(b){var x=document.createElement('button');x.textContent=b.t;x.style.cssText='padding:8px 20px;border-radius:10px;border:0;font:inherit;cursor:pointer;background:'+(b.p?'#2563eb':'#e5e7eb')+';color:'+(b.p?'#fff':'#111');x.onclick=function(){o.remove();if(b.f)b.f();};r.appendChild(x);});
+    c.appendChild(r);o.appendChild(c);document.body.appendChild(o);
+  }
+  window.alert=function(msg){modal(String(msg),[{t:'حسنًا',p:true}]);};
+  window.__ask=function(msg,yes){modal(String(msg),[{t:'نعم',p:true,f:yes},{t:'إلغاء'}]);};
+})();
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم وتتبع خطة مذاكرة القدرات — v3.0</title>
+    
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0F172A',
+                        cardbg: '#1E293B',
+                        cardborder: '#334155',
+                        accentEmerald: '#10B981',
+                        accentViolet: '#8B5CF6',
+                        accentSky: '#0EA5E9',
+                        accentRed: '#EF4444',
+                        accentAmber: '#F59E0B',
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F172A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10B981;
+        }
+
+        /* Glassmorphic card effect */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Active tab underline glow */
+        .active-tab {
+            border-bottom: 3px solid #10B981;
+            color: #10B981 !important;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .completed-card {
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(16, 185, 129, 0.05)) !important;
+        }
+
+        .skipped-card {
+            border: 1px solid rgba(245, 158, 11, 0.35) !important;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(245, 158, 11, 0.05)) !important;
+        }
+
+        /* Pulse glow animation for high achievements */
+        @keyframes subtleGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.15); }
+            50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.35); }
+        }
+        @keyframes subtleAmberGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.15); }
+            50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.35); }
+        }
+        .glow-completed {
+            animation: subtleGlow 3s infinite ease-in-out;
+        }
+        .glow-skipped {
+            animation: subtleAmberGlow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12 antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- Top Header -->
+    <header class="sticky top-0 z-40 bg-darkbg/90 backdrop-blur-md border-b border-cardborder shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-accentEmerald to-accentViolet flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold text-white tracking-wide flex items-center gap-2">
+                            لوحة متابعة القدرات
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-accentEmerald border border-emerald-500/20">شاملة الكراش كورس</span>
+                        </h1>
+                        <p class="text-xs text-slate-400">إتقان (102 قسم حمراء) + فهرس الزيتونة (139 قسمًا) + كراش كورس إيهاب (15 جزءًا)</p>
+                    </div>
+                </div>
+
+                <!-- Quick Action Buttons for Mobile -->
+                <div class="flex md:hidden items-center gap-2">
+                    <button onclick="confirmReset()" title="إعادة ضبط التقدم" class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all text-xs">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Global Action Controls -->
+            <div class="hidden md:flex items-center gap-3">
+                <button onclick="scrollToToday()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-cardborder text-xs font-medium flex items-center gap-2 transition-all hover:border-accentEmerald/50">
+                    <i class="fa-solid fa-calendar-day text-accentEmerald"></i>
+                    الانتقال لليوم الحالي
+                </button>
+                <button onclick="exportSummary()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-cardborder text-xs font-medium flex items-center gap-2 transition-all hover:border-accentViolet/50">
+                    <i class="fa-solid fa-print text-accentViolet"></i>
+                    طباعة / حفظ التقرير
+                </button>
+                <button onclick="confirmReset()" class="px-3.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-medium flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    إعادة ضبط الكلية
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+
+        <!-- Top Analytics & Progress Overview Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+            
+            <!-- Stat Cards Column (7 cols) -->
+            <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-2 gap-4">
+                
+                <!-- Stat Card 1: Total Progress % -->
+                <div class="col-span-2 glass-card rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/30 transition-all shadow-xl">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-all"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">نسبة الإنجاز الإجمالية</span>
+                        <span id="overallBadge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-500/10 text-accentEmerald border border-emerald-500/20">0%</span>
+                    </div>
+                    <div class="flex items-baseline gap-3 mb-3">
+                        <span id="overallPercentage" class="text-4xl sm:text-5xl font-black text-white tracking-tight">0%</span>
+                        <span class="text-xs text-slate-400" id="motivationalMsg">ابدأ خطتك بثبات وتوكل على الله!</span>
+                    </div>
+                    <!-- Live Stacked Multi-color Progress Bar -->
+                    <div class="w-full bg-slate-900 rounded-full h-3.5 overflow-hidden p-0.5 border border-slate-700/50 flex gap-0.5">
+                        <div id="overallCompletedBar" class="bg-gradient-to-r from-accentEmerald to-teal-400 h-full rounded-l-full transition-all duration-700 ease-out w-0 shadow-lg shadow-emerald-500/50" title="مكتمل"></div>
+                        <div id="overallSkippedBar" class="bg-gradient-to-r from-amber-500 to-yellow-400 h-full transition-all duration-700 ease-out w-0 shadow-lg shadow-amber-500/50" title="متخطى"></div>
+                    </div>
+                </div>
+
+                <!-- Stat Card 2: Daily Tasks Progress -->
+                <div class="glass-card rounded-2xl p-4 relative overflow-hidden border border-cardborder hover:border-slate-600 transition-all">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">مهام جدول الأيام</span>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-accentEmerald flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-white mb-1" id="dailyTasksStat">0 / 0</div>
+                    <p class="text-[11px] text-slate-400" id="dailyTasksSub">0% مكتمل من المهام اليومية</p>
+                </div>
+
+                <!-- Stat Card 3: Crash Course Progress -->
+                <div class="glass-card rounded-2xl p-4 relative overflow-hidden border border-cardborder hover:border-slate-600 transition-all">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">كراش كورس إيهاب (15)</span>
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-white mb-1" id="crashStat">0 / 15</div>
+                    <p class="text-[11px] text-slate-400" id="crashSub">0% من دورة الكراش كورس</p>
+                </div>
+
+                <!-- Phase Progress Breakdown Mini Cards -->
+                <div class="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="bg-slate-800/60 rounded-xl p-3 border border-cardborder/60">
+                        <div class="flex justify-between items-center text-xs mb-1.5">
+                            <span class="text-slate-300 font-medium">الأقسام الحمراء (102)</span>
+                            <span id="redTextStat" class="font-bold text-red-400">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-2 flex overflow-hidden">
+                            <div id="redBar" class="bg-red-500 h-2 transition-all duration-500 w-0"></div>
+                            <div id="redSkippedBar" class="bg-amber-500 h-2 transition-all duration-500 w-0"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/60 rounded-xl p-3 border border-cardborder/60">
+                        <div class="flex justify-between items-center text-xs mb-1.5">
+                            <span class="text-slate-300 font-medium">فهرس الزيتونة (139)</span>
+                            <span id="zaytounaTextStat" class="font-bold text-accentViolet">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-2 flex overflow-hidden">
+                            <div id="zaytounaBar" class="bg-accentViolet h-2 transition-all duration-500 w-0"></div>
+                            <div id="zaytounaSkippedBar" class="bg-amber-500 h-2 transition-all duration-500 w-0"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Chart Column (5 cols) -->
+            <div class="lg:col-span-5 glass-card rounded-2xl p-5 border border-cardborder flex flex-col justify-between items-center relative">
+                <div class="w-full flex justify-between items-center mb-2">
+                    <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-accentEmerald"></i>
+                        التوزيع البياني المباشر للإنجاز
+                    </h2>
+                    <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">تحديث فوري</span>
+                </div>
+                
+                <div class="relative w-full max-w-[220px] aspect-square my-2 flex items-center justify-center">
+                    <canvas id="progressChart"></canvas>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span id="chartCenterText" class="text-2xl font-black text-white">0%</span>
+                        <span class="text-[10px] text-slate-400">إجمالي المنجز والمتخطى</span>
+                    </div>
+                </div>
+
+                <!-- Custom Chart Legend -->
+                <div class="w-full grid grid-cols-3 gap-1 text-[11px] pt-3 border-t border-slate-800">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                        <span class="text-slate-300">مكتمل</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 justify-center">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+                        <span class="text-amber-400 font-bold">متخطى (تسكيب)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 justify-end">
+                        <span class="w-2.5 h-2.5 rounded-full bg-slate-700 inline-block"></span>
+                        <span class="text-slate-400">متبقي</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Tabs Navigation Bar -->
+        <div class="flex items-center justify-between border-b border-cardborder mb-6">
+            <div class="flex gap-2 overflow-x-auto pb-px">
+                <button onclick="switchTab('daily')" id="tabBtnDaily" class="active-tab px-4 py-3 rounded-t-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap">
+                    <i class="fa-solid fa-calendar-days text-base"></i>
+                    <span>الجدول اليومي</span>
+                </button>
+
+                <button onclick="switchTab('crash')" id="tabBtnCrash" class="px-4 py-3 text-slate-400 hover:text-slate-200 rounded-t-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap">
+                    <i class="fa-solid fa-bolt text-amber-400 text-base"></i>
+                    <span>فهرس الكراش كورس (إيهاب)</span>
+                    <span id="crashCountBadge" class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">15 قسمًا</span>
+                </button>
+
+                <button onclick="switchTab('red')" id="tabBtnRed" class="px-4 py-3 text-slate-400 hover:text-slate-200 rounded-t-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap">
+                    <i class="fa-solid fa-circle-play text-red-400 text-base"></i>
+                    <span>الأقسام الحمراء</span>
+                    <span id="redCountBadge" class="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">102 قسمًا</span>
+                </button>
+
+                <button onclick="switchTab('zaytouna')" id="tabBtnZaytouna" class="px-4 py-3 text-slate-400 hover:text-slate-200 rounded-t-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap">
+                    <i class="fa-solid fa-book-open text-base"></i>
+                    <span>فهرس الزيتونة</span>
+                    <span id="zaytounaCountBadge" class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-accentViolet border border-purple-500/30">139 قسمًا</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 1: DAILY SCHEDULE CONTAINER -->
+        <div id="tabDailyContainer" class="space-y-6">
+            
+            <!-- Controls & Phase Filter -->
+            <div class="glass-card p-4 rounded-xl flex flex-wrap items-center justify-between gap-3 border border-cardborder">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-bold text-slate-400 ml-2"><i class="fa-solid fa-filter text-accentEmerald"></i> تصفية الأيام:</span>
+                    <button onclick="filterSchedule('all')" id="filterAll" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-white shadow-sm">الكل (12 يوم)</button>
+                    <button onclick="filterSchedule('phase1')" id="filterP1" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المرحلة الأولى (10 أيام)</button>
+                    <button onclick="filterSchedule('phase2')" id="filterP2" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المرحلة الثانية (يومان)</button>
+                    <button onclick="filterSchedule('pending')" id="filterPending" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">غير المكتملة</button>
+                </div>
+
+                <div class="text-xs text-slate-400 flex items-center gap-3 flex-wrap">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> مكتمل بالكامل</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> متخطى (تسكيب)</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-700"></span> جاري العمل</span>
+                </div>
+            </div>
+
+            <!-- Daily Cards Grid -->
+            <div id="dailyScheduleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+                <!-- Injected via JavaScript -->
+            </div>
+
+        </div>
+
+        <!-- TAB 2: CRASH COURSE INDEX CONTAINER (EHAB) -->
+        <div id="tabCrashContainer" class="hidden space-y-6">
+            
+            <!-- Crash Course Header & Filter -->
+            <div class="glass-card p-5 rounded-2xl border border-cardborder space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-black text-white flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-amber-400"></i>
+                            فهرس كراش كورس إيهاب (الاصدار الشامل)
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">يحتوي على الأقسام الرئيسية (شبه الحمراء والزيتونة) بالإضافة للأقسام الجديدة</p>
+                    </div>
+
+                    <!-- Category Switcher Buttons -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button onclick="filterCrashCategory('all')" id="cCatAll" class="c-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950">الكل (15)</button>
+                        <button onclick="filterCrashCategory('main')" id="cCatMain" class="c-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">الأقسام الرئيسية (5)</button>
+                        <button onclick="filterCrashCategory('new')" id="cCatNew" class="c-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">الأقسام الجديدة (10)</button>
+                    </div>
+                </div>
+
+                <!-- Search and Status Controls -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center pt-3 border-t border-slate-800">
+                    <div class="lg:col-span-6 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="crashSearchInput" oninput="handleCrashSearch()" placeholder="ابحث برقم القسم أو عنوان الكراش كورس..." 
+                               class="w-full pl-10 pr-10 py-2 bg-slate-900/90 border border-cardborder rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-all shadow-inner">
+                    </div>
+
+                    <div class="lg:col-span-6 flex items-center gap-2 flex-wrap justify-start lg:justify-end">
+                        <button onclick="filterCrashStatus('all')" id="cFilterAll" class="c-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-700 text-white">جميع الحالات</button>
+                        <button onclick="filterCrashStatus('completed')" id="cFilterCompleted" class="c-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المكتملة</button>
+                        <button onclick="filterCrashStatus('skipped')" id="cFilterSkipped" class="c-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المتخطاة</button>
+                        <button onclick="filterCrashStatus('pending')" id="cFilterPending" class="c-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المتبقية</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crash Course Content Display Area -->
+            <div id="crashDisplayArea" class="space-y-6">
+                <!-- Dynamically rendered via JS -->
+            </div>
+
+        </div>
+
+        <!-- TAB 3: RED SECTIONS INDEX CONTAINER (ITQAN) -->
+        <div id="tabRedContainer" class="hidden space-y-6">
+            
+            <!-- Search & Controls Bar -->
+            <div class="glass-card p-5 rounded-2xl border border-cardborder space-y-4">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                    <!-- Search Input -->
+                    <div class="lg:col-span-6 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="redSearchInput" oninput="handleRedSearch()" placeholder="ابحث برقم القسم أو عنوانه (مثال: القسم 25 أو النسبة المئوية)..." 
+                               class="w-full pl-10 pr-10 py-2.5 bg-slate-900/90 border border-cardborder rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 transition-all shadow-inner">
+                        <button onclick="clearRedSearch()" id="clearRedSearchBtn" class="hidden absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Red Sections Status Filter -->
+                    <div class="lg:col-span-6 flex items-center gap-2 flex-wrap justify-start lg:justify-end">
+                        <button onclick="filterRed('all')" id="rFilterAll" class="r-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white">الكل (102)</button>
+                        <button onclick="filterRed('completed')" id="rFilterCompleted" class="r-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المكتملة</button>
+                        <button onclick="filterRed('skipped')" id="rFilterSkipped" class="r-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المتخطاة (تسكيب)</button>
+                        <button onclick="filterRed('pending')" id="rFilterPending" class="r-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المتبقية</button>
+                        
+                        <div class="h-4 w-px bg-slate-700 my-auto mx-1"></div>
+
+                        <!-- View Switcher -->
+                        <div class="flex items-center bg-slate-900 rounded-lg p-0.5 border border-slate-700">
+                            <button onclick="setRedView('table')" id="btnRedViewTable" class="px-2.5 py-1 rounded-md text-xs font-medium text-red-400 bg-slate-800 shadow">
+                                <i class="fa-solid fa-table-list"></i>
+                            </button>
+                            <button onclick="setRedView('grid')" id="btnRedViewGrid" class="px-2.5 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-white">
+                                <i class="fa-solid fa-grip"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Range Jump Buttons -->
+                <div class="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-800/80 text-xs">
+                    <span class="text-slate-400 font-medium"><i class="fa-solid fa-bolt text-amber-400"></i> قفز سريع للأقسام:</span>
+                    <button onclick="jumpToRedRange(1, 25)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">1 - 25</button>
+                    <button onclick="jumpToRedRange(26, 50)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">26 - 50</button>
+                    <button onclick="jumpToRedRange(51, 75)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">51 - 75</button>
+                    <button onclick="jumpToRedRange(76, 102)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">76 - 102 (الختام)</button>
+                    
+                    <div class="mr-auto text-slate-400 text-xs" id="matchingRedCountText">عرض 102 قسمًا</div>
+                </div>
+
+            </div>
+
+            <!-- Red Display Area -->
+            <div id="redDisplayArea" class="space-y-4">
+                <!-- Dynamically rendered Table or Grid -->
+            </div>
+
+        </div>
+
+        <!-- TAB 4: FULL ZAYTOUNA INDEX CONTAINER -->
+        <div id="tabZaytounaContainer" class="hidden space-y-6">
+            
+            <!-- Search & Controls Bar -->
+            <div class="glass-card p-5 rounded-2xl border border-cardborder space-y-4">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                    <!-- Search Input -->
+                    <div class="lg:col-span-6 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="zaytounaSearchInput" oninput="handleZaytounaSearch()" placeholder="ابحث باسم القسم أو رقم الصفحة (مثال: كينيا، الزلازل، 110)..." 
+                               class="w-full pl-10 pr-10 py-2.5 bg-slate-900/90 border border-cardborder rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-accentEmerald transition-all shadow-inner">
+                        <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Zaytouna Status Filter -->
+                    <div class="lg:col-span-6 flex items-center gap-2 flex-wrap justify-start lg:justify-end">
+                        <button onclick="filterZaytouna('all')" id="zFilterAll" class="z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-accentViolet text-white">الكل (139)</button>
+                        <button onclick="filterZaytouna('completed')" id="zFilterCompleted" class="z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المكتملة</button>
+                        <button onclick="filterZaytouna('skipped')" id="zFilterSkipped" class="z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المتخطاة (تسكيب)</button>
+                        <button onclick="filterZaytouna('pending')" id="zFilterPending" class="z-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">المتبقية</button>
+                        
+                        <div class="h-4 w-px bg-slate-700 my-auto mx-1"></div>
+
+                        <!-- View Switcher -->
+                        <div class="flex items-center bg-slate-900 rounded-lg p-0.5 border border-slate-700">
+                            <button onclick="setZaytounaView('table')" id="btnViewTable" class="px-2.5 py-1 rounded-md text-xs font-medium text-emerald-400 bg-slate-800 shadow">
+                                <i class="fa-solid fa-table-list"></i>
+                            </button>
+                            <button onclick="setZaytounaView('grid')" id="btnViewGrid" class="px-2.5 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-white">
+                                <i class="fa-solid fa-grip"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Range Jump Buttons -->
+                <div class="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-800/80 text-xs">
+                    <span class="text-slate-400 font-medium"><i class="fa-solid fa-bolt text-amber-400"></i> قفز سريع للمجموعات:</span>
+                    <button onclick="jumpToZaytounaRange(1, 30)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">1 - 30</button>
+                    <button onclick="jumpToZaytounaRange(31, 70)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">31 - 70</button>
+                    <button onclick="jumpToZaytounaRange(71, 110)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">71 - 110</button>
+                    <button onclick="jumpToZaytounaRange(111, 139)" class="px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50">111 - 139 (الختام)</button>
+                    
+                    <div class="mr-auto text-slate-400 text-xs" id="matchingCountText">عرض 139 قسمًا</div>
+                </div>
+
+            </div>
+
+            <!-- Zaytouna View Display Container -->
+            <div id="zaytounaDisplayArea" class="space-y-4">
+                <!-- Dynamically rendered Table or Grid -->
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Confirmation Modal for Override / Skip -->
+    <div id="confirmActionModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full rounded-2xl p-6 border border-amber-500/40 shadow-2xl space-y-4 text-center animate-in fade-in zoom-in duration-200">
+            <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white" id="confirmModalTitle">تنبيه: وجود إنجاز سابق</h3>
+            <p id="confirmModalBody" class="text-xs text-slate-300 leading-relaxed">
+                هذه المهمة تحتوي على دروس/أقسام منجزة ومكتملة سابقاً. هل أنت تأكد من اختيـار <span class="text-amber-400 font-bold">(تسكيب)</span> وتحويل هذه الأقسام أم تريد الإلغاء؟
+            </p>
+            <div class="flex items-center gap-3 pt-2">
+                <button onclick="executeConfirmedTaskAction()" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition-all shadow-lg shadow-amber-500/20">
+                    نعم، تأكيـد الإجراء
+                </button>
+                <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-cardborder transition-all">
+                    تراجع / إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal for Reset -->
+    <div id="resetModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full rounded-2xl p-6 border border-red-500/30 shadow-2xl space-y-4 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white">تأكيد إعادة ضبط التقدم</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                هل أنت تأكد من رغبتك في مسح كافة التحديدات والتقدم المكتمل والتسكياب؟ سيتم إعادة جميع المهام والأقسام إلى الحالة الأصلية (غير مكتملة).
+            </p>
+            <div class="flex items-center gap-3 pt-2">
+                <button onclick="executeReset()" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition-all shadow-lg shadow-red-600/30">
+                    نعم، إعـادة الضبط
+                </button>
+                <button onclick="closeResetModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-cardborder transition-all">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Popup -->
+    <div id="toastNotification" class="fixed bottom-5 left-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toastCard" class="glass-card border border-emerald-500/40 bg-slate-900/95 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+            <div id="toastIcon" class="w-8 h-8 rounded-lg bg-emerald-500/20 text-accentEmerald flex items-center justify-center text-sm">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <div>
+                <h4 id="toastTitle" class="text-xs font-bold text-white">تم الحفظ</h4>
+                <p id="toastBody" class="text-[11px] text-slate-300">تم تحديث الإحصائيات تلقائياً</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate Red Sections (102 Sections)
+        const redSectionsData = Array.from({ length: 102 }, (_, i) => ({
+            id: i + 1,
+            title: `قسم إتقان الأحمر - القسم ${i + 1}`,
+            source: 'منصة إتقان'
+        }));
+
+        // Crash Course Dataset (Main Sections & Ehab New Sections)
+        const crashCourseData = [
+            // Main Sections Index (الاقسام الرئيسية - الحمراء والزيتونة)
+            { id: "c_main_1", group: "main", title: "شرح أول 20 قسم", rangeText: "الأقسام (1 إلى 20)", description: "مقدمة وتأسيس شاملي للأجزاء الأساسية" },
+            { id: "c_main_2", group: "main", title: "شرح الأقسام حتى 52", rangeText: "الأقسام (21 إلى 52)", description: "تغطية مهارات القسم الأوسط وتكثيف الأسئلة" },
+            { id: "c_main_3", group: "main", title: "شرح الأقسام حتى 79", rangeText: "الأقسام (53 إلى 79)", description: "شرح التناظر المفاهيمي واستراتيجيات الحل السريع" },
+            { id: "c_main_4", group: "main", title: "شرح الأقسام حتى 106", rangeText: "الأقسام (80 إلى 106)", description: "إتقان واستيعاب كافة أفكار القسم المترابطة" },
+            { id: "c_main_5", group: "main", title: "شرح الأقسام حتى 261", rangeText: "الأقسام (107 إلى 261)", description: "الختام المكثف وتطبيقات شاملة للأقسام الموسعة" },
+
+            // Ehab - New Sections Index (فهرس إيهاب - الأقسام الجديدة)
+            { id: "c_new_1", group: "new", title: "الأقسام من 263 إلى 266", rangeText: "الأقسام 263 - 266", description: "الأقسام الحديثة - الجزء الأول" },
+            { id: "c_new_2", group: "new", title: "الأقسام من 267 إلى 273", rangeText: "الأقسام 267 - 273", description: "الأقسام الحديثة - الجزء الثاني" },
+            { id: "c_new_3", group: "new", title: "الأقسام من 274 إلى 282", rangeText: "الأقسام 274 - 282", description: "الأقسام الحديثة - الجزء الثالث" },
+            { id: "c_new_4", group: "new", title: "الأقسام من 283 إلى 291", rangeText: "الأقسام 283 - 291", description: "الأقسام الحديثة - الجزء الرابع" },
+            { id: "c_new_5", group: "new", title: "الأقسام من 292 إلى 301", rangeText: "الأقسام 292 - 301", description: "الأقسام الحديثة - الجزء الخامس" },
+            { id: "c_new_6", group: "new", title: "القسم 302", rangeText: "القسم 302 منفردًا", description: "القسم المستقل رقم 302" },
+            { id: "c_new_7", group: "new", title: "القسم 303", rangeText: "القسم 303 منفردًا", description: "القسم المستقل رقم 303" },
+            { id: "c_new_8", group: "new", title: "القسم 304", rangeText: "القسم 304 منفردًا", description: "القسم المستقل رقم 304" },
+            { id: "c_new_9", group: "new", title: "القسم 305", rangeText: "القسم 305 منفردًا", description: "القسم المستقل رقم 305" },
+            { id: "c_new_10", group: "new", title: "القسم 306", rangeText: "القسم 306 (ختام الأقسام الجديدة)", description: "القسم المستقل رقم 306" }
+        ];
+
+        const zaytounaData = [
+            {"id": 1, "title": "كينيا وفضل الطيبة", "page": 7},
+            {"id": 2, "title": "الزلازل والسكري", "page": 11},
+            {"id": 3, "title": "الترجمة والرياضة", "page": 15},
+            {"id": 4, "title": "الرشاشات وعمالة الأطفال", "page": 18},
+            {"id": 5, "title": "النمل وترتيب العلماء", "page": 23},
+            {"id": 6, "title": "مالك والقناعة", "page": 27},
+            {"id": 7, "title": "الكافيين والإنسان المدني", "page": 31},
+            {"id": 8, "title": "الزيت", "page": 34},
+            {"id": 9, "title": "الأديب وفصول السنة", "page": 37},
+            {"id": 10, "title": "ياقوت الحموي والصفدي", "page": 40},
+            {"id": 11, "title": "الانزيمات والقراءة", "page": 43},
+            {"id": 12, "title": "التقاويم وآثار الفضاء", "page": 47},
+            {"id": 13, "title": "التربية والزعفران", "page": 51},
+            {"id": 14, "title": "الأحذية والتخزين", "page": 55},
+            {"id": 15, "title": "التوحيدي والعالم الافتراضي", "page": 59},
+            {"id": 16, "title": "المعادلة الظالمة والاعتزاز بالنفس", "page": 63},
+            {"id": 17, "title": "الجمل والطحالب", "page": 67},
+            {"id": 18, "title": "الصفدي ووصف الجندي", "page": 71},
+            {"id": 19, "title": "الجغرافيا الطبيعية والسمنة", "page": 74},
+            {"id": 20, "title": "الحج والسدود", "page": 78},
+            {"id": 21, "title": "الانزيمات والمماليك", "page": 81},
+            {"id": 22, "title": "الألواح الشمسية والانفلونزا", "page": 85},
+            {"id": 23, "title": "الهدية والنفط", "page": 89},
+            {"id": 24, "title": "البكتيريا والمطرقة", "page": 93},
+            {"id": 25, "title": "المحاولة شرف والمبادرة بالأعمال", "page": 96},
+            {"id": 26, "title": "تلمسان وضبط المجرم", "page": 100},
+            {"id": 27, "title": "الإنسان السعيد والفراسة", "page": 104},
+            {"id": 28, "title": "المشكلات والرحمة", "page": 107},
+            {"id": 29, "title": "الورق وكينيا", "page": 110},
+            {"id": 30, "title": "الزعفران والقصة القصيرة", "page": 114},
+            {"id": 31, "title": "البصمة والحواس", "page": 117},
+            {"id": 32, "title": "التنمية والنمو والرضاعة", "page": 121},
+            {"id": 33, "title": "روسيا وكسوة الكعبة", "page": 125},
+            {"id": 34, "title": "الحياة الفطرية والانفجار السكاني", "page": 129},
+            {"id": 35, "title": "النمل الأبيض", "page": 133},
+            {"id": 36, "title": "أبو بكر الرازي وتنظيم الوقت", "page": 136},
+            {"id": 37, "title": "واقع التعليم ونبي الرحمة", "page": 140},
+            {"id": 38, "title": "الأديب والتطوع", "page": 143},
+            {"id": 39, "title": "كسوة الكعبة والعمل عن بعد", "page": 147},
+            {"id": 40, "title": "المكاتبة والربع الخالي", "page": 151},
+            {"id": 41, "title": "المافيا واللغة العربية", "page": 155},
+            {"id": 42, "title": "الحجامة والوقت", "page": 159},
+            {"id": 43, "title": "البطاطس", "page": 163},
+            {"id": 44, "title": "طلاقة الوجه والخضراوات", "page": 166},
+            {"id": 45, "title": "عوامل الحسم وكيفية بيع الأرض", "page": 170},
+            {"id": 46, "title": "آثار الفضاء ومعركة اليرموك", "page": 174},
+            {"id": 47, "title": "المواد الدراسية", "page": 178},
+            {"id": 48, "title": "الكريم واللئيم ولذة العبادة", "page": 182},
+            {"id": 49, "title": "اليأس والشجاع", "page": 185},
+            {"id": 50, "title": "الواقع الافتراضي والأكسجين", "page": 188},
+            {"id": 51, "title": "التلفاز وإيطاليا واليابان", "page": 192},
+            {"id": 52, "title": "النفط والتقاويم", "page": 196},
+            {"id": 53, "title": "تسونامي وغلاف الجوي", "page": 200},
+            {"id": 54, "title": "التصحيح والحسد", "page": 204},
+            {"id": 55, "title": "الأدب والبراهين", "page": 208},
+            {"id": 56, "title": "القلق والطفل", "page": 211},
+            {"id": 57, "title": "قضم الأظافر والشيخوخة", "page": 215},
+            {"id": 58, "title": "التفاؤل والمقابلة", "page": 218},
+            {"id": 59, "title": "التمرّكز والفوليك", "page": 222},
+            {"id": 60, "title": "البخاري والرازي", "page": 228},
+            {"id": 61, "title": "تلاشي المستقبل والرجولة", "page": 232},
+            {"id": 62, "title": "المراهقين والتفاؤل", "page": 236},
+            {"id": 63, "title": "الهاتف والفنانين", "page": 240},
+            {"id": 64, "title": "المأمون والنفط", "page": 244},
+            {"id": 65, "title": "الندم وااختلاف العقول", "page": 247},
+            {"id": 66, "title": "التشخيص والمافيا", "page": 250},
+            {"id": 67, "title": "العطش وتحمل المتاعب", "page": 254},
+            {"id": 68, "title": "الوطواط والمسك", "page": 257},
+            {"id": 69, "title": "الازدواجية اللغوية", "page": 260},
+            {"id": 70, "title": "دوار الشمس للنخل", "page": 264},
+            {"id": 71, "title": "التعليم والتضاريس", "page": 268},
+            {"id": 72, "title": "كينيا والشاي", "page": 272},
+            {"id": 73, "title": "المدرسة المونستيرية", "page": 276},
+            {"id": 74, "title": "الانزيمات وفيتامين د", "page": 280},
+            {"id": 75, "title": "البرازيل والأشعة السينية", "page": 284},
+            {"id": 76, "title": "التنقيب عن النفط", "page": 288},
+            {"id": 77, "title": "الجيوش والزلازل", "page": 292},
+            {"id": 78, "title": "الغواصة الروسية والمنتديات", "page": 296},
+            {"id": 79, "title": "جاما والمكتشفات البحرية", "page": 299},
+            {"id": 80, "title": "الجدري وقياس الرأي العام", "page": 303},
+            {"id": 81, "title": "التجارة الالكترونية والنفط", "page": 306},
+            {"id": 82, "title": "القراءة وطريق الخير", "page": 310},
+            {"id": 83, "title": "الأهلة والاختيار السليم", "page": 313},
+            {"id": 84, "title": "الحرانكش والبحر الميت", "page": 316},
+            {"id": 85, "title": "زحل والتالف", "page": 321},
+            {"id": 86, "title": "حشرة السمك والتهاب اللوزتين", "page": 324},
+            {"id": 87, "title": "التواضع وحلم الطفل", "page": 327},
+            {"id": 88, "title": "المنظمات والفضاء", "page": 330},
+            {"id": 89, "title": "الشركات الامريكية والعقاقير", "page": 334},
+            {"id": 90, "title": "الأوروبيون والأزياء", "page": 338},
+            {"id": 91, "title": "التوحد والتمور", "page": 342},
+            {"id": 92, "title": "المنظمات الراغب بالنجاح", "page": 346},
+            {"id": 93, "title": "القراءة", "page": 350},
+            {"id": 94, "title": "الشوكولاته", "page": 353},
+            {"id": 95, "title": "الشجاعة", "page": 357},
+            {"id": 96, "title": "ابن فارس", "page": 360},
+            {"id": 97, "title": "الأسواق المالية", "page": 363},
+            {"id": 98, "title": "السمنة", "page": 366},
+            {"id": 99, "title": "الرياح الموسمية", "page": 369},
+            {"id": 100, "title": "التعصب الرياضي", "page": 372},
+            {"id": 101, "title": "الثقة بالله", "page": 375},
+            {"id": 102, "title": "الهدية", "page": 378},
+            {"id": 103, "title": "نظام الويندوز", "page": 381},
+            {"id": 104, "title": "السيوف", "page": 384},
+            {"id": 105, "title": "المرداوي", "page": 387},
+            {"id": 106, "title": "عبد الله بن عباس", "page": 390},
+            {"id": 107, "title": "شجرة الزيتون", "page": 393},
+            {"id": 108, "title": "اينشتاين", "page": 396},
+            {"id": 109, "title": "احسان النية", "page": 399},
+            {"id": 110, "title": "اللؤلؤ والرشاشات", "page": 402},
+            {"id": 111, "title": "تشستر كارلسون", "page": 405},
+            {"id": 112, "title": "سيء الظن", "page": 408},
+            {"id": 113, "title": "الصقور والخسائر الاقتصادية", "page": 411},
+            {"id": 114, "title": "القطب الجنوبي", "page": 415},
+            {"id": 115, "title": "دودة القز", "page": 418},
+            {"id": 116, "title": "الجاحظ", "page": 421},
+            {"id": 117, "title": "الشعر", "page": 424},
+            {"id": 118, "title": "السجن والدعوة الى الله", "page": 427},
+            {"id": 119, "title": "الحزم", "page": 430},
+            {"id": 120, "title": "النفط والسمنة", "page": 433},
+            {"id": 121, "title": "الدعوة الى الله", "page": 436},
+            {"id": 122, "title": "التوحيد", "page": 439},
+            {"id": 123, "title": "الأخطار الاقتصادية", "page": 442},
+            {"id": 124, "title": "الاحتراق الوظيفي", "page": 445},
+            {"id": 125, "title": "جامعة الملك سعود", "page": 448},
+            {"id": 126, "title": "التخطيط", "page": 451},
+            {"id": 127, "title": "التعدين", "page": 454},
+            {"id": 128, "title": "تعدد الأوجه والرعي البيئي", "page": 457},
+            {"id": 129, "title": "التمر", "page": 460},
+            {"id": 130, "title": "النفس", "page": 463},
+            {"id": 131, "title": "البيولوجيا الصناعية", "page": 466},
+            {"id": 132, "title": "حضارة أمريكا واليابان", "page": 469},
+            {"id": 133, "title": "الرواية", "page": 472},
+            {"id": 134, "title": "المناخ", "page": 474},
+            {"id": 135, "title": "الرؤيا والبحر الميت", "page": 476},
+            {"id": 136, "title": "الغواصة الروسية والازدواجية", "page": 478},
+            {"id": 137, "title": "الألوان", "page": 481},
+            {"id": 138, "title": "العصافير", "page": 483},
+            {"id": 139, "title": "القمر", "page": 485}
+        ];
+
+        const dailySchedule = [
+            // Phase 1
+            {
+                id: "day_1",
+                dateStr: "25 سبتمبر",
+                dayName: "الجمعة",
+                phase: 1,
+                isoDate: "2026-09-25",
+                tasks: [
+                    { id: "d1_t1", title: "إتقان - الأقسام الحمراء (أقسام 1-10)", category: "itqan", rRange: [1, 10] },
+                    { id: "d1_t2", title: "الزيتونة (أقسام 1-14)", category: "zaytouna", zRange: [1, 14] }
+                ]
+            },
+            {
+                id: "day_2",
+                dateStr: "26 سبتمبر",
+                dayName: "السبت",
+                phase: 1,
+                isoDate: "2026-09-26",
+                tasks: [
+                    { id: "d2_t1", title: "إتقان - الأقسام الحمراء (أقسام 11-20)", category: "itqan", rRange: [11, 20] },
+                    { id: "d2_t2", title: "الزيتونة (أقسام 15-28)", category: "zaytouna", zRange: [15, 28] }
+                ]
+            },
+            {
+                id: "day_3",
+                dateStr: "27 سبتمبر",
+                dayName: "الأحد",
+                phase: 1,
+                isoDate: "2026-09-27",
+                tasks: [
+                    { id: "d3_t1", title: "إتقان - الأقسام الحمراء (أقسام 21-30)", category: "itqan", rRange: [21, 30] },
+                    { id: "d3_t2", title: "الزيتونة (أقسام 29-42)", category: "zaytouna", zRange: [29, 42] }
+                ]
+            },
+            {
+                id: "day_4",
+                dateStr: "28 سبتمبر",
+                dayName: "الإثنين",
+                phase: 1,
+                isoDate: "2026-09-28",
+                tasks: [
+                    { id: "d4_t1", title: "إتقان - الأقسام الحمراء (أقسام 31-40)", category: "itqan", rRange: [31, 40] },
+                    { id: "d4_t2", title: "الزيتونة (أقسام 43-56)", category: "zaytouna", zRange: [43, 56] }
+                ]
+            },
+            {
+                id: "day_5",
+                dateStr: "29 سبتمبر",
+                dayName: "الثلاثاء",
+                phase: 1,
+                isoDate: "2026-09-29",
+                tasks: [
+                    { id: "d5_t1", title: "إتقان - الأقسام الحمراء (أقسام 41-50)", category: "itqan", rRange: [41, 50] },
+                    { id: "d5_t2", title: "الزيتونة (أقسام 57-70)", category: "zaytouna", zRange: [57, 70] }
+                ]
+            },
+            {
+                id: "day_6",
+                dateStr: "30 سبتمبر",
+                dayName: "الأربعاء",
+                phase: 1,
+                isoDate: "2026-09-30",
+                tasks: [
+                    { id: "d6_t1", title: "إتقان - الأقسام الحمراء (أقسام 51-62)", category: "itqan", rRange: [51, 62] },
+                    { id: "d6_t2", title: "الزيتونة (أقسام 71-84)", category: "zaytouna", zRange: [71, 84] }
+                ]
+            },
+            {
+                id: "day_7",
+                dateStr: "01 أكتوبر",
+                dayName: "الخميس",
+                phase: 1,
+                isoDate: "2026-10-01",
+                tasks: [
+                    { id: "d7_t1", title: "إتقان - الأقسام الحمراء (أقسام 63-75)", category: "itqan", rRange: [63, 75] },
+                    { id: "d7_t2", title: "الزيتونة (أقسام 85-98)", category: "zaytouna", zRange: [85, 98] }
+                ]
+            },
+            {
+                id: "day_8",
+                dateStr: "02 أكتوبر",
+                dayName: "الجمعة",
+                phase: 1,
+                isoDate: "2026-10-02",
+                tasks: [
+                    { id: "d8_t1", title: "إتقان - الأقسام الحمراء (أقسام 76-88)", category: "itqan", rRange: [76, 88] },
+                    { id: "d8_t2", title: "الزيتونة (أقسام 99-112)", category: "zaytouna", zRange: [99, 112] }
+                ]
+            },
+            {
+                id: "day_9",
+                dateStr: "03 أكتوبر",
+                dayName: "السبت",
+                phase: 1,
+                isoDate: "2026-10-03",
+                tasks: [
+                    { id: "d9_t1", title: "إتقان - الأقسام الحمراء (أقسام 89-102)", category: "itqan", rRange: [89, 102] },
+                    { id: "d9_t2", title: "الزيتونة (أقسام 113-126)", category: "zaytouna", zRange: [113, 126] },
+                    { id: "d9_t3", title: "إيهاب - الكراش كورس (اليوم الأول: الأقسام الرئيسية)", category: "ehab", crashGroup: "main" }
+                ]
+            },
+            {
+                id: "day_10",
+                dateStr: "04 أكتوبر",
+                dayName: "الأحد",
+                phase: 1,
+                isoDate: "2026-10-04",
+                tasks: [
+                    { id: "d10_t1", title: "مراجعة أخطاء إتقان", category: "revision" },
+                    { id: "d10_t2", title: "الزيتونة (أقسام 127-139 الختام)", category: "zaytouna", zRange: [127, 139] },
+                    { id: "d10_t3", title: "إيهاب - الكراش كورس (اليوم الثاني: الأقسام الجديدة)", category: "ehab", crashGroup: "new" }
+                ]
+            },
+            // Phase 2
+            {
+                id: "day_11",
+                dateStr: "05 أكتوبر",
+                dayName: "الإثنين",
+                phase: 2,
+                isoDate: "2026-10-05",
+                tasks: [
+                    { id: "d11_t1", title: "مراجعة الأقسام الأعلى تكراراً", category: "revision" },
+                    { id: "d11_t2", title: "أخطاء إتقان والزيتونة وإعادة حل ملف الأخطاء", category: "revision" },
+                    { id: "d11_t3", title: "قوانين الكمي الصعبة", category: "revision" }
+                ]
+            },
+            {
+                id: "day_12",
+                dateStr: "06 أكتوبر",
+                dayName: "الثلاثاء",
+                phase: 2,
+                isoDate: "2026-10-06",
+                tasks: [
+                    { id: "d12_t1", title: "استذكار بصري لأهم الكلمات والتناظرات", category: "revision" },
+                    { id: "d12_t2", title: "التوقف عن المذاكرة مع العصر لإراحة الذهن", category: "rest" }
+                ]
+            }
+        ];
+
+        const STORAGE_KEY = 'qudrat_study_plan_v4';
+        
+        let appState = {
+            tasks: {},        // { taskId: 'completed' | 'skipped' | 'pending' }
+            zaytouna: {},     // { zId: 'completed' | 'skipped' | 'pending' }
+            red: {},          // { rId: 'completed' | 'skipped' | 'pending' }
+            crash: {},        // { crashId: 'completed' | 'skipped' | 'pending' }
+            currentTab: 'daily',
+            scheduleFilter: 'all',
+            zaytounaFilter: 'all',
+            zaytounaView: 'table',
+            searchQuery: '',
+            redFilter: 'all',
+            redView: 'table',
+            redSearchQuery: '',
+            crashCategoryFilter: 'all', // 'all', 'main', 'new'
+            crashStatusFilter: 'all',   // 'all', 'completed', 'skipped', 'pending'
+            crashSearchQuery: ''
+        };
+
+        // Helper to normalize status ('completed', 'skipped', 'pending')
+        function getStatus(val) {
+            if (val === true || val === 'completed') return 'completed';
+            if (val === 'skipped') return 'skipped';
+            return 'pending';
+        }
+
+        // Load saved state from LocalStorage
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appState.tasks = parsed.tasks || {};
+                    appState.zaytouna = parsed.zaytouna || {};
+                    appState.red = parsed.red || {};
+                    appState.crash = parsed.crash || {};
+                }
+            } catch (e) {
+                console.error("Could not load state from localStorage", e);
+            }
+        }
+
+        // Save state to LocalStorage
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    tasks: appState.tasks,
+                    zaytouna: appState.zaytouna,
+                    red: appState.red,
+                    crash: appState.crash
+                }));
+            } catch (e) {
+                console.error("Could not save state to localStorage", e);
+            }
+        }
+
+        let progressChartInstance = null;
+
+        function initChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            progressChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['المكتمل', 'المتخطى (تسكيب)', 'المتبقي'],
+                    datasets: [{
+                        data: [0, 0, 100],
+                        backgroundColor: ['#10B981', '#F59E0B', '#334155'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '78%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            bodyFont: { family: 'Cairo' },
+                            titleFont: { family: 'Cairo' },
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Sync Bidirectional Logic
+        function syncBidirectional(sourceType, id, newStatus) {
+            if (sourceType === 'task') {
+                let targetTask = null;
+                dailySchedule.forEach(day => {
+                    day.tasks.forEach(t => {
+                        if (t.id === id) targetTask = t;
+                    });
+                });
+
+                if (targetTask) {
+                    if (targetTask.zRange) {
+                        const [start, end] = targetTask.zRange;
+                        for (let z = start; z <= end; z++) {
+                            appState.zaytouna[z] = newStatus;
+                        }
+                    }
+                    if (targetTask.rRange) {
+                        const [start, end] = targetTask.rRange;
+                        for (let r = start; r <= end; r++) {
+                            appState.red[r] = newStatus;
+                        }
+                    }
+                    if (targetTask.crashGroup) {
+                        crashCourseData.filter(c => c.group === targetTask.crashGroup).forEach(c => {
+                            appState.crash[c.id] = newStatus;
+                        });
+                    }
+                }
+            } else if (sourceType === 'zaytouna') {
+                dailySchedule.forEach(day => {
+                    day.tasks.forEach(t => {
+                        if (t.zRange) {
+                            const [start, end] = t.zRange;
+                            let completedCount = 0;
+                            let skippedCount = 0;
+                            const total = (end - start + 1);
+
+                            for (let z = start; z <= end; z++) {
+                                const st = getStatus(appState.zaytouna[z]);
+                                if (st === 'completed') completedCount++;
+                                else if (st === 'skipped') skippedCount++;
+                            }
+
+                            if (completedCount === total) {
+                                appState.tasks[t.id] = 'completed';
+                            } else if (completedCount + skippedCount === total) {
+                                appState.tasks[t.id] = 'skipped';
+                            } else {
+                                appState.tasks[t.id] = 'pending';
+                            }
+                        }
+                    });
+                });
+            } else if (sourceType === 'red') {
+                dailySchedule.forEach(day => {
+                    day.tasks.forEach(t => {
+                        if (t.rRange) {
+                            const [start, end] = t.rRange;
+                            let completedCount = 0;
+                            let skippedCount = 0;
+                            const total = (end - start + 1);
+
+                            for (let r = start; r <= end; r++) {
+                                const st = getStatus(appState.red[r]);
+                                if (st === 'completed') completedCount++;
+                                else if (st === 'skipped') skippedCount++;
+                            }
+
+                            if (completedCount === total) {
+                                appState.tasks[t.id] = 'completed';
+                            } else if (completedCount + skippedCount === total) {
+                                appState.tasks[t.id] = 'skipped';
+                            } else {
+                                appState.tasks[t.id] = 'pending';
+                            }
+                        }
+                    });
+                });
+            } else if (sourceType === 'crash') {
+                dailySchedule.forEach(day => {
+                    day.tasks.forEach(t => {
+                        if (t.crashGroup) {
+                            const items = crashCourseData.filter(c => c.group === t.crashGroup);
+                            let completedCount = 0;
+                            let skippedCount = 0;
+                            const total = items.length;
+
+                            items.forEach(c => {
+                                const st = getStatus(appState.crash[c.id]);
+                                if (st === 'completed') completedCount++;
+                                else if (st === 'skipped') skippedCount++;
+                            });
+
+                            if (completedCount === total) {
+                                appState.tasks[t.id] = 'completed';
+                            } else if (completedCount + skippedCount === total) {
+                                appState.tasks[t.id] = 'skipped';
+                            } else {
+                                appState.tasks[t.id] = 'pending';
+                            }
+                        }
+                    });
+                });
+            }
+
+            saveState();
+            updateAllStatsAndUI();
+        }
+
+        function calculateStats() {
+            let totalDaily = 0, completedDaily = 0, skippedDaily = 0;
+
+            dailySchedule.forEach(day => {
+                day.tasks.forEach(t => {
+                    totalDaily++;
+                    const st = getStatus(appState.tasks[t.id]);
+                    if (st === 'completed') completedDaily++;
+                    else if (st === 'skipped') skippedDaily++;
+                });
+            });
+
+            // Count Zaytouna 139 sections
+            let totalZaytouna = 139, completedZaytouna = 0, skippedZaytouna = 0;
+            for (let i = 1; i <= 139; i++) {
+                const st = getStatus(appState.zaytouna[i]);
+                if (st === 'completed') completedZaytouna++;
+                else if (st === 'skipped') skippedZaytouna++;
+            }
+
+            // Count Red Sections 102
+            let totalRed = 102, completedRed = 0, skippedRed = 0;
+            for (let i = 1; i <= 102; i++) {
+                const st = getStatus(appState.red[i]);
+                if (st === 'completed') completedRed++;
+                else if (st === 'skipped') skippedRed++;
+            }
+
+            // Count Crash Course 15 items
+            let totalCrash = crashCourseData.length, completedCrash = 0, skippedCrash = 0;
+            crashCourseData.forEach(item => {
+                const st = getStatus(appState.crash[item.id]);
+                if (st === 'completed') completedCrash++;
+                else if (st === 'skipped') skippedCrash++;
+            });
+
+            // Percentages
+            const dailyCompPct = totalDaily > 0 ? (completedDaily / totalDaily) : 0;
+            const dailySkipPct = totalDaily > 0 ? (skippedDaily / totalDaily) : 0;
+            const dailyTotalPct = dailyCompPct + dailySkipPct;
+
+            const zaytounaCompPct = (completedZaytouna / totalZaytouna);
+            const zaytounaSkipPct = (skippedZaytouna / totalZaytouna);
+            const zaytounaTotalPct = zaytounaCompPct + zaytounaSkipPct;
+
+            const redCompPct = (completedRed / totalRed);
+            const redSkipPct = (skippedRed / totalRed);
+            const redTotalPct = redCompPct + redSkipPct;
+
+            const crashCompPct = (completedCrash / totalCrash);
+            const crashSkipPct = (skippedCrash / totalCrash);
+            const crashTotalPct = crashCompPct + crashSkipPct;
+
+            // Overall Progress calculation (Weighted sum)
+            const overallCompletedPct = Math.round((dailyCompPct * 0.35 + zaytounaCompPct * 0.25 + redCompPct * 0.25 + crashCompPct * 0.15) * 100);
+            const overallSkippedPct = Math.round((dailySkipPct * 0.35 + zaytounaSkipPct * 0.25 + redSkipPct * 0.25 + crashSkipPct * 0.15) * 100);
+            const overallTotalPct = Math.min(100, overallCompletedPct + overallSkippedPct);
+
+            return {
+                totalDaily,
+                completedDaily,
+                skippedDaily,
+                dailyTotalPct: Math.round(dailyTotalPct * 100),
+                totalZaytouna,
+                completedZaytouna,
+                skippedZaytouna,
+                zaytounaTotalPct: Math.round(zaytounaTotalPct * 100),
+                totalRed,
+                completedRed,
+                skippedRed,
+                redTotalPct: Math.round(redTotalPct * 100),
+                totalCrash,
+                completedCrash,
+                skippedCrash,
+                crashTotalPct: Math.round(crashTotalPct * 100),
+                overallCompletedPct,
+                overallSkippedPct,
+                overallTotalPct
+            };
+        }
+
+        function updateAllStatsAndUI() {
+            const stats = calculateStats();
+
+            // Update main Percentage UI
+            document.getElementById('overallPercentage').innerText = `${stats.overallTotalPct}%`;
+            document.getElementById('overallBadge').innerText = `${stats.overallTotalPct}% إنجاز كلي`;
+            
+            // Dual Progress bar widths
+            document.getElementById('overallCompletedBar').style.width = `${stats.overallCompletedPct}%`;
+            document.getElementById('overallSkippedBar').style.width = `${stats.overallSkippedPct}%`;
+
+            document.getElementById('chartCenterText').innerText = `${stats.overallTotalPct}%`;
+
+            // Motivational messages
+            const msgEl = document.getElementById('motivationalMsg');
+            if (stats.overallTotalPct === 0) msgEl.innerText = "ابدأ خطتك بثبات وتوكل على الله!";
+            else if (stats.overallTotalPct < 30) msgEl.innerText = "بداية قوية! واصل التقدم بخطى ثابتة 🚀";
+            else if (stats.overallTotalPct < 70) msgEl.innerText = "إنجاز رائع! أنت الآن في منتصف الطريق 💪";
+            else if (stats.overallTotalPct < 100) msgEl.innerText = "اقتربت من القمة! استمر فالنصر قريب 🔥";
+            else msgEl.innerText = "مبارك! أتممت الخطة بنجاح باهر 🥳🎉";
+
+            // Stats cards
+            const dailyDone = stats.completedDaily + stats.skippedDaily;
+            document.getElementById('dailyTasksStat').innerText = `${dailyDone} / ${stats.totalDaily}`;
+            document.getElementById('dailyTasksSub').innerText = `${stats.dailyTotalPct}% إنجاز (${stats.completedDaily} مكتمل • ${stats.skippedDaily} متخطى)`;
+
+            const crashDone = stats.completedCrash + stats.skippedCrash;
+            document.getElementById('crashStat').innerText = `${crashDone} / ${stats.totalCrash}`;
+            document.getElementById('crashSub').innerText = `${stats.crashTotalPct}% إنجاز (${stats.completedCrash} مكتمل • ${stats.skippedCrash} متخطى)`;
+
+            // Mini stats
+            document.getElementById('redTextStat').innerText = `${stats.redTotalPct}%`;
+            document.getElementById('redBar').style.width = `${Math.round((stats.completedRed / 102) * 100)}%`;
+            document.getElementById('redSkippedBar').style.width = `${Math.round((stats.skippedRed / 102) * 100)}%`;
+
+            document.getElementById('zaytounaTextStat').innerText = `${stats.zaytounaTotalPct}%`;
+            document.getElementById('zaytounaBar').style.width = `${Math.round((stats.completedZaytouna / 139) * 100)}%`;
+            document.getElementById('zaytounaSkippedBar').style.width = `${Math.round((stats.skippedZaytouna / 139) * 100)}%`;
+
+            // Update Chart
+            if (progressChartInstance) {
+                const rem = Math.max(0, 100 - (stats.overallCompletedPct + stats.overallSkippedPct));
+                progressChartInstance.data.datasets[0].data = [stats.overallCompletedPct, stats.overallSkippedPct, rem];
+                progressChartInstance.update();
+            }
+
+            // Re-render UI components
+            renderDailySchedule();
+            renderCrashCourseIndex();
+            renderRedSectionsIndex();
+            renderZaytounaIndex();
+        }
+
+        function renderDailySchedule() {
+            const grid = document.getElementById('dailyScheduleGrid');
+            grid.innerHTML = '';
+
+            const todayIso = new Date().toISOString().split('T')[0];
+
+            dailySchedule.forEach((day) => {
+                if (appState.scheduleFilter === 'phase1' && day.phase !== 1) return;
+                if (appState.scheduleFilter === 'phase2' && day.phase !== 2) return;
+
+                const dayTasksTotal = day.tasks.length;
+                let dayTasksDone = 0;
+                let dayTasksSkipped = 0;
+
+                day.tasks.forEach(t => {
+                    const st = getStatus(appState.tasks[t.id]);
+                    if (st === 'completed') dayTasksDone++;
+                    else if (st === 'skipped') dayTasksSkipped++;
+                });
+
+                const isDayProcessed = dayTasksTotal > 0 && (dayTasksDone + dayTasksSkipped === dayTasksTotal);
+                const hasSkipped = dayTasksSkipped > 0;
+
+                if (appState.scheduleFilter === 'pending' && isDayProcessed) return;
+
+                const isToday = day.isoDate === todayIso;
+
+                const card = document.createElement('div');
+                card.id = `card_${day.id}`;
+                
+                let cardStyleClasses = 'border-cardborder hover:border-slate-600';
+                if (isDayProcessed) {
+                    if (hasSkipped && dayTasksDone === 0) {
+                        cardStyleClasses = 'skipped-card glow-skipped';
+                    } else if (hasSkipped) {
+                        cardStyleClasses = 'skipped-card glow-skipped';
+                    } else {
+                        cardStyleClasses = 'completed-card glow-completed';
+                    }
+                } else if (isToday) {
+                    cardStyleClasses = 'border-accentEmerald/60 shadow-lg shadow-emerald-500/10 ring-1 ring-accentEmerald/30';
+                }
+
+                card.className = `glass-card rounded-2xl p-5 border transition-all duration-300 relative overflow-hidden ${cardStyleClasses}`;
+
+                const phaseBadge = day.phase === 1 
+                    ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-accentEmerald border border-emerald-500/20">المرحلة الأولى</span>'
+                    : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-accentViolet border border-purple-500/20">المرحلة الثانية</span>';
+
+                let tasksHTML = '';
+                day.tasks.forEach(t => {
+                    const st = getStatus(appState.tasks[t.id]);
+                    let catBadge = '';
+
+                    if (t.category === 'itqan') {
+                        catBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">إتقان</span>';
+                    } else if (t.category === 'zaytouna') {
+                        catBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">الزيتونة</span>';
+                    } else if (t.category === 'ehab') {
+                        catBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">إيهاب</span>';
+                    } else {
+                        catBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">مراجعة</span>';
+                    }
+
+                    let jumpBtn = '';
+                    if (t.zRange) {
+                        jumpBtn = `
+                            <button onclick="event.stopPropagation(); jumpToZaytounaTab(${t.zRange[0]}, ${t.zRange[1]})" 
+                                    title="عرض الأقسام في جدول الزيتونة" 
+                                    class="text-[11px] text-accentViolet hover:text-white bg-purple-500/10 hover:bg-purple-500/30 px-2 py-0.5 rounded border border-purple-500/20 transition-all flex items-center gap-1 ml-1">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                الزيتونة
+                            </button>
+                        `;
+                    } else if (t.rRange) {
+                        jumpBtn = `
+                            <button onclick="event.stopPropagation(); jumpToRedTab(${t.rRange[0]}, ${t.rRange[1]})" 
+                                    title="عرض الأقسام الحمراء في الفهرس" 
+                                    class="text-[11px] text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/30 px-2 py-0.5 rounded border border-red-500/20 transition-all flex items-center gap-1 ml-1">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                الأقسام الحمراء
+                            </button>
+                        `;
+                    } else if (t.crashGroup) {
+                        jumpBtn = `
+                            <button onclick="event.stopPropagation(); jumpToCrashGroup('${t.crashGroup}')" 
+                                    title="عرض الكراش كورس في التبويب" 
+                                    class="text-[11px] text-amber-400 hover:text-white bg-amber-500/10 hover:bg-amber-500/30 px-2 py-0.5 rounded border border-amber-500/20 transition-all flex items-center gap-1 ml-1">
+                                <i class="fa-solid fa-bolt"></i>
+                                الكراش كورس
+                            </button>
+                        `;
+                    }
+
+                    // Task status row background & style
+                    let taskRowBg = 'bg-slate-900/60 border-slate-800 hover:border-slate-700';
+                    let taskTextStyle = 'text-slate-200';
+                    let statusBadge = '';
+
+                    if (st === 'completed') {
+                        taskRowBg = 'bg-emerald-500/10 border-emerald-500/30';
+                        taskTextStyle = 'line-through text-emerald-400 font-medium';
+                        statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold flex items-center gap-1"><i class="fa-solid fa-check text-[9px]"></i>مكتمل</span>';
+                    } else if (st === 'skipped') {
+                        taskRowBg = 'bg-amber-500/10 border-amber-500/30';
+                        taskTextStyle = 'line-through text-amber-300 font-medium';
+                        statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold flex items-center gap-1"><i class="fa-solid fa-forward text-[9px]"></i>متخطى</span>';
+                    }
+
+                    // Action buttons
+                    const checkBtnClass = st === 'completed'
+                        ? 'w-7 h-7 rounded-lg bg-emerald-500 text-slate-950 font-bold border border-emerald-400 shadow-md shadow-emerald-500/30 flex items-center justify-center transition-all'
+                        : 'w-7 h-7 rounded-lg border border-slate-700 bg-slate-900/80 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-all';
+
+                    const skipBtnClass = st === 'skipped'
+                        ? 'w-7 h-7 rounded-lg bg-amber-500 text-slate-950 font-bold border border-amber-400 shadow-md shadow-amber-500/30 flex items-center justify-center transition-all'
+                        : 'w-7 h-7 rounded-lg border border-slate-700 bg-slate-900/80 text-slate-400 hover:text-amber-400 hover:border-amber-500/50 flex items-center justify-center transition-all';
+
+                    tasksHTML += `
+                        <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all ${taskRowBg}">
+                            <div class="flex items-center gap-2.5">
+                                <div class="flex items-center gap-1.5" onclick="event.stopPropagation()">
+                                    <button onclick="setTaskStatus('${t.id}', 'completed')" 
+                                            title="تحديد كمكتمل" 
+                                            class="${checkBtnClass}">
+                                        <i class="fa-solid fa-check text-xs"></i>
+                                    </button>
+                                    <button onclick="setTaskStatus('${t.id}', 'skipped')" 
+                                            title="تحديد كتسكيب (تخطي)" 
+                                            class="${skipBtnClass}">
+                                        <i class="fa-solid fa-forward text-xs"></i>
+                                    </button>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-semibold ${taskTextStyle} transition-all">
+                                        ${t.title}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                ${statusBadge}
+                                ${catBadge}
+                                ${jumpBtn}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                let dayFooterMsg = '';
+                if (isDayProcessed) {
+                    if (hasSkipped) {
+                        dayFooterMsg = `
+                            <div class="mt-3 pt-2 border-t border-amber-500/20 text-center text-[11px] font-bold text-amber-400 flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-forward text-sm"></i> تم إكمال هذا اليوم (يتضمن دروس متخطاة)
+                            </div>
+                        `;
+                    } else {
+                        dayFooterMsg = `
+                            <div class="mt-3 pt-2 border-t border-emerald-500/20 text-center text-[11px] font-bold text-accentEmerald flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-award text-sm"></i> تم إنجاز هذا اليوم بالكامل!
+                            </div>
+                        `;
+                    }
+                }
+
+                card.innerHTML = `
+                    ${isToday ? '<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-violet-500"></div>' : ''}
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-black text-white">${day.dateStr}</span>
+                            <span class="text-xs text-slate-400 font-medium">(${day.dayName})</span>
+                            ${isToday ? '<span class="text-[10px] bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full font-bold">اليوم</span>' : ''}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${phaseBadge}
+                            <span class="text-xs font-bold ${isDayProcessed ? (hasSkipped ? 'text-amber-400' : 'text-accentEmerald') : 'text-slate-400'}">
+                                ${dayTasksDone + dayTasksSkipped}/${dayTasksTotal}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        ${tasksHTML}
+                    </div>
+
+                    ${dayFooterMsg}
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function renderCrashCourseIndex() {
+            const area = document.getElementById('crashDisplayArea');
+            area.innerHTML = '';
+
+            const searchQ = appState.crashSearchQuery.trim().toLowerCase();
+
+            // Filter crash data based on category, status, and search query
+            const filtered = crashCourseData.filter(item => {
+                // Category filter
+                if (appState.crashCategoryFilter === 'main' && item.group !== 'main') return false;
+                if (appState.crashCategoryFilter === 'new' && item.group !== 'new') return false;
+
+                // Status filter
+                const st = getStatus(appState.crash[item.id]);
+                if (appState.crashStatusFilter === 'completed' && st !== 'completed') return false;
+                if (appState.crashStatusFilter === 'skipped' && st !== 'skipped') return false;
+                if (appState.crashStatusFilter === 'pending' && st !== 'pending') return false;
+
+                // Search query
+                if (searchQ !== '') {
+                    const matchesTitle = item.title.toLowerCase().includes(searchQ);
+                    const matchesRange = item.rangeText.toLowerCase().includes(searchQ);
+                    const matchesDesc = item.description.toLowerCase().includes(searchQ);
+                    if (!matchesTitle && !matchesRange && !matchesDesc) return false;
+                }
+
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                area.innerHTML = `
+                    <div class="glass-card rounded-2xl p-12 text-center text-slate-400 space-y-3">
+                        <i class="fa-solid fa-magnifying-glass text-4xl text-slate-600"></i>
+                        <h3 class="text-base font-bold text-slate-300">لم يتم العثور على أجزاء مطابقة</h3>
+                        <p class="text-xs">جرب البحث بكلمة أخرى أو قم بإلغاء التصفية الحالية.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Separate into Groups for clear presentation
+            const mainGroup = filtered.filter(item => item.group === 'main');
+            const newGroup = filtered.filter(item => item.group === 'new');
+
+            // Render Main Sections Group if available
+            if (mainGroup.length > 0) {
+                const mainSec = document.createElement('div');
+                mainSec.className = 'space-y-3';
+                mainSec.innerHTML = `
+                    <div class="flex items-center gap-2 border-b border-amber-500/20 pb-2">
+                        <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                        <h3 class="text-sm font-bold text-amber-300">الأقسام الرئيسية - (مثل الأقسام الحمراء والزيتونة)</h3>
+                        <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-medium ml-auto">5 أجزاء</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="crashMainGrid"></div>
+                `;
+                area.appendChild(mainSec);
+
+                const grid = mainSec.querySelector('#crashMainGrid');
+                mainGroup.forEach(item => grid.appendChild(createCrashCardHTML(item)));
+            }
+
+            // Render New Sections Group if available
+            if (newGroup.length > 0) {
+                const newSec = document.createElement('div');
+                newSec.className = 'space-y-3 pt-2';
+                newSec.innerHTML = `
+                    <div class="flex items-center gap-2 border-b border-purple-500/20 pb-2">
+                        <span class="w-3 h-3 rounded-full bg-accentViolet"></span>
+                        <h3 class="text-sm font-bold text-purple-300">فهرس إيهاب - الأقسام الجديدة</h3>
+                        <span class="text-[10px] bg-purple-500/10 text-purple-300 border border-purple-500/20 px-2 py-0.5 rounded-full font-medium ml-auto">10 أجزاء</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="crashNewGrid"></div>
+                `;
+                area.appendChild(newSec);
+
+                const grid = newSec.querySelector('#crashNewGrid');
+                newGroup.forEach(item => grid.appendChild(createCrashCardHTML(item)));
+            }
+        }
+
+        // Helper function to create individual crash course card elements
+        function createCrashCardHTML(item) {
+            const st = getStatus(appState.crash[item.id]);
+
+            let cardBg = 'bg-slate-900/80 border-slate-800 hover:border-slate-700';
+            let titleStyle = 'text-white';
+            let badgeHTML = '';
+
+            if (st === 'completed') {
+                cardBg = 'bg-emerald-500/10 border-emerald-500/40';
+                titleStyle = 'line-through text-emerald-400 font-bold';
+                badgeHTML = '<span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 font-bold"><i class="fa-solid fa-check ml-1"></i>مكتمل</span>';
+            } else if (st === 'skipped') {
+                cardBg = 'bg-amber-500/10 border-amber-500/40';
+                titleStyle = 'line-through text-amber-300 font-bold';
+                badgeHTML = '<span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded border border-amber-500/30 font-bold"><i class="fa-solid fa-forward ml-1"></i>متخطى</span>';
+            }
+
+            const checkBtnClass = st === 'completed'
+                ? 'w-7 h-7 rounded-lg bg-emerald-500 text-slate-950 font-bold border border-emerald-400 flex items-center justify-center transition-all'
+                : 'w-7 h-7 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-emerald-400 flex items-center justify-center transition-all';
+
+            const skipBtnClass = st === 'skipped'
+                ? 'w-7 h-7 rounded-lg bg-amber-500 text-slate-950 font-bold border border-amber-400 flex items-center justify-center transition-all'
+                : 'w-7 h-7 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-amber-400 flex items-center justify-center transition-all';
+
+            const card = document.createElement('div');
+            card.className = `glass-card p-4 rounded-xl border transition-all flex items-center justify-between gap-3 ${cardBg}`;
+
+            card.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="setCrashStatus('${item.id}', 'completed')" title="تحديد كمكتمل" class="${checkBtnClass}">
+                            <i class="fa-solid fa-check text-xs"></i>
+                        </button>
+                        <button onclick="setCrashStatus('${item.id}', 'skipped')" title="تحديد كتسكيب" class="${skipBtnClass}">
+                            <i class="fa-solid fa-forward text-xs"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="text-xs sm:text-sm font-bold ${titleStyle}">${item.title}</h4>
+                            ${badgeHTML}
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-0.5">${item.rangeText} • ${item.description}</p>
+                    </div>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700/60 whitespace-nowrap">
+                    ${item.group === 'main' ? 'كراش رئيسي' : 'أقسام جديدة'}
+                </span>
+            `;
+
+            return card;
+        }
+
+        function renderRedSectionsIndex() {
+            const area = document.getElementById('redDisplayArea');
+            area.innerHTML = '';
+
+            const query = appState.redSearchQuery.trim().toLowerCase();
+
+            let filtered = redSectionsData.filter(item => {
+                const matchesSearch = query === '' || 
+                    item.title.toLowerCase().includes(query) || 
+                    item.id.toString().includes(query);
+
+                if (!matchesSearch) return false;
+
+                const st = getStatus(appState.red[item.id]);
+                if (appState.redFilter === 'completed' && st !== 'completed') return false;
+                if (appState.redFilter === 'skipped' && st !== 'skipped') return false;
+                if (appState.redFilter === 'pending' && st !== 'pending') return false;
+
+                return true;
+            });
+
+            document.getElementById('matchingRedCountText').innerText = `عرض ${filtered.length} من أصل 102 قسمًا`;
+
+            if (filtered.length === 0) {
+                area.innerHTML = `
+                    <div class="glass-card rounded-2xl p-12 text-center text-slate-400 space-y-3">
+                        <i class="fa-solid fa-magnifying-glass text-4xl text-slate-600"></i>
+                        <h3 class="text-base font-bold text-slate-300">لم يتم العثور على نتائج مطابقة</h3>
+                        <p class="text-xs">جرب البحث بكلمة أخرى أو قم بإلغاء التصفية الحالية.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (appState.redView === 'table') {
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'glass-card rounded-2xl overflow-hidden border border-cardborder shadow-xl';
+
+                let rowsHTML = '';
+                filtered.forEach(item => {
+                    const st = getStatus(appState.red[item.id]);
+                    let rowBg = '';
+                    let textStyle = 'text-slate-100';
+                    let badge = '';
+
+                    if (st === 'completed') {
+                        rowBg = 'bg-emerald-500/5';
+                        textStyle = 'line-through text-emerald-400';
+                        badge = '<span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">مكتمل</span>';
+                    } else if (st === 'skipped') {
+                        rowBg = 'bg-amber-500/5';
+                        textStyle = 'line-through text-amber-300';
+                        badge = '<span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded border border-amber-500/30 font-bold">متخطى</span>';
+                    }
+
+                    const checkBtnClass = st === 'completed'
+                        ? 'w-6 h-6 rounded bg-emerald-500 text-slate-950 font-bold border border-emerald-400 flex items-center justify-center transition-all'
+                        : 'w-6 h-6 rounded border border-slate-700 bg-slate-900 text-slate-400 hover:text-emerald-400 flex items-center justify-center transition-all';
+
+                    const skipBtnClass = st === 'skipped'
+                        ? 'w-6 h-6 rounded bg-amber-500 text-slate-950 font-bold border border-amber-400 flex items-center justify-center transition-all'
+                        : 'w-6 h-6 rounded border border-slate-700 bg-slate-900 text-slate-400 hover:text-amber-400 flex items-center justify-center transition-all';
+
+                    rowsHTML += `
+                        <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition-all ${rowBg}">
+                            <td class="p-3 text-center w-20">
+                                <div class="flex items-center justify-center gap-1">
+                                    <button onclick="setRedStatus(${item.id}, 'completed')" title="مكتمل" class="${checkBtnClass}">
+                                        <i class="fa-solid fa-check text-[10px]"></i>
+                                    </button>
+                                    <button onclick="setRedStatus(${item.id}, 'skipped')" title="تسكيب" class="${skipBtnClass}">
+                                        <i class="fa-solid fa-forward text-[10px]"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="p-3 text-xs font-bold text-slate-400 w-20">قسم #${item.id}</td>
+                            <td class="p-3 text-xs sm:text-sm font-semibold ${textStyle}">
+                                ${item.title}
+                            </td>
+                            <td class="p-3 text-xs font-bold text-left w-36">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    ${badge}
+                                    <span class="bg-red-500/10 px-2 py-1 rounded-md border border-red-500/20 text-red-400 text-[11px]">${item.source}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableContainer.innerHTML = `
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/80 border-b border-cardborder text-xs text-slate-400">
+                                    <th class="p-3 text-center">الإجراء</th>
+                                    <th class="p-3">رقم القسم</th>
+                                    <th class="p-3">اسم القسم الأحمر</th>
+                                    <th class="p-3 text-left">المصدر والحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                ${rowsHTML}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                area.appendChild(tableContainer);
+            } else {
+                const gridContainer = document.createElement('div');
+                gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5';
+
+                filtered.forEach(item => {
+                    const st = getStatus(appState.red[item.id]);
+                    let cardBg = 'border-cardborder hover:border-slate-600';
+                    let textStyle = 'text-slate-200';
+
+                    if (st === 'completed') {
+                        cardBg = 'border-emerald-500/40 bg-emerald-500/5';
+                        textStyle = 'line-through text-emerald-400';
+                    } else if (st === 'skipped') {
+                        cardBg = 'border-amber-500/40 bg-amber-500/5';
+                        textStyle = 'line-through text-amber-300';
+                    }
+
+                    const checkBtnClass = st === 'completed'
+                        ? 'w-7 h-7 rounded-lg bg-emerald-500 text-slate-950 font-bold border border-emerald-400 flex items-center justify-center transition-all'
+                        : 'w-7 h-7 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-emerald-400 flex items-center justify-center transition-all';
+
+                    const skipBtnClass = st === 'skipped'
+                        ? 'w-7 h-7 rounded-lg bg-amber-500 text-slate-950 font-bold border border-amber-400 flex items-center justify-center transition-all'
+                        : 'w-7 h-7 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-amber-400 flex items-center justify-center transition-all';
+
+                    const itemCard = document.createElement('div');
+                    itemCard.className = `glass-card p-3.5 rounded-xl border transition-all flex items-center justify-between ${cardBg}`;
+
+                    itemCard.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-1">
+                                <button onclick="setRedStatus(${item.id}, 'completed')" title="مكتمل" class="${checkBtnClass}">
+                                    <i class="fa-solid fa-check text-xs"></i>
+                                </button>
+                                <button onclick="setRedStatus(${item.id}, 'skipped')" title="تسكيب" class="${skipBtnClass}">
+                                    <i class="fa-solid fa-forward text-xs"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 block">قسم أحمر #${item.id}</span>
+                                <h4 class="text-xs font-bold ${textStyle}">${item.title}</h4>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-red-400 bg-red-500/10 px-2 py-1 rounded border border-red-500/20 whitespace-nowrap">
+                            إتقان
+                        </span>
+                    `;
+
+                    gridContainer.appendChild(itemCard);
+                });
+
+                area.appendChild(gridContainer);
+            }
+        }
+
+        function renderZaytounaIndex() {
+            const area = document.getElementById('zaytounaDisplayArea');
+            area.innerHTML = '';
+
+            const query = appState.searchQuery.trim().toLowerCase();
+
+            let filtered = zaytounaData.filter(item => {
+                const matchesSearch = query === '' || 
+                    item.title.toLowerCase().includes(query) || 
+                    item.page.toString().includes(query) ||
+                    item.id.toString().includes(query);
+
+                if (!matchesSearch) return false;
+
+                const st = getStatus(appState.zaytouna[item.id]);
+                if (appState.zaytounaFilter === 'completed' && st !== 'completed') return false;
+                if (appState.zaytounaFilter === 'skipped' && st !== 'skipped') return false;
+                if (appState.zaytounaFilter === 'pending' && st !== 'pending') return false;
+
+                return true;
+            });
+
+            document.getElementById('matchingCountText').innerText = `عرض ${filtered.length} من أصل 139 قسمًا`;
+
+            if (filtered.length === 0) {
+                area.innerHTML = `
+                    <div class="glass-card rounded-2xl p-12 text-center text-slate-400 space-y-3">
+                        <i class="fa-solid fa-magnifying-glass text-4xl text-slate-600"></i>
+                        <h3 class="text-base font-bold text-slate-300">لم يتم العثور على نتائج مطابقة</h3>
+                        <p class="text-xs">جرب البحث بكلمة أخرى أو قم بإلغاء التصفية الحالية.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (appState.zaytounaView === 'table') {
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'glass-card rounded-2xl overflow-hidden border border-cardborder shadow-xl';
+
+                let rowsHTML = '';
+                filtered.forEach(item => {
+                    const st = getStatus(appState.zaytouna[item.id]);
+                    let rowBg = '';
+                    let textStyle = 'text-slate-100';
+                    let badge = '';
+
+                    if (st === 'completed') {
+                        rowBg = 'bg-emerald-500/5';
+                        textStyle = 'line-through text-emerald-400';
+                        badge = '<span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">مكتمل</span>';
+                    } else if (st === 'skipped') {
+                        rowBg = 'bg-amber-500/5';
+                        textStyle = 'line-through text-amber-300';
+                        badge = '<span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded border border-amber-500/30 font-bold">متخطى</span>';
+                    }
+
+                    const checkBtnClass = st === 'completed'
+                        ? 'w-6 h-6 rounded bg-emerald-500 text-slate-950 font-bold border border-emerald-400 flex items-center justify-center transition-all'
+                        : 'w-6 h-6 rounded border border-slate-700 bg-slate-900 text-slate-400 hover:text-emerald-400 flex items-center justify-center transition-all';
+
+                    const skipBtnClass = st === 'skipped'
+                        ? 'w-6 h-6 rounded bg-amber-500 text-slate-950 font-bold border border-amber-400 flex items-center justify-center transition-all'
+                        : 'w-6 h-6 rounded border border-slate-700 bg-slate-900 text-slate-400 hover:text-amber-400 flex items-center justify-center transition-all';
+
+                    rowsHTML += `
+                        <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition-all ${rowBg}">
+                            <td class="p-3 text-center w-20">
+                                <div class="flex items-center justify-center gap-1">
+                                    <button onclick="setZaytounaStatus(${item.id}, 'completed')" title="مكتمل" class="${checkBtnClass}">
+                                        <i class="fa-solid fa-check text-[10px]"></i>
+                                    </button>
+                                    <button onclick="setZaytounaStatus(${item.id}, 'skipped')" title="تسكيب" class="${skipBtnClass}">
+                                        <i class="fa-solid fa-forward text-[10px]"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="p-3 text-xs font-bold text-slate-400 w-16">#${item.id}</td>
+                            <td class="p-3 text-xs sm:text-sm font-semibold ${textStyle}">
+                                ${item.title}
+                            </td>
+                            <td class="p-3 text-xs font-bold text-left w-36">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    ${badge}
+                                    <span class="bg-purple-500/10 px-2.5 py-1 rounded-md border border-purple-500/20 text-accentViolet">صـ ${item.page}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableContainer.innerHTML = `
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/80 border-b border-cardborder text-xs text-slate-400">
+                                    <th class="p-3 text-center">الإجراء</th>
+                                    <th class="p-3">الرقم</th>
+                                    <th class="p-3">عنوان القسم / الموضوع</th>
+                                    <th class="p-3 text-left">رقم الصفحة والحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                ${rowsHTML}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                area.appendChild(tableContainer);
+
+            } else {
+                const gridContainer = document.createElement('div');
+                gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5';
+
+                filtered.forEach(item => {
+                    const st = getStatus(appState.zaytouna[item.id]);
+                    let cardBg = 'border-cardborder hover:border-slate-600';
+                    let textStyle = 'text-slate-200';
+
+                    if (st === 'completed') {
+                        cardBg = 'border-emerald-500/40 bg-emerald-500/5';
+                        textStyle = 'line-through text-emerald-400';
+                    } else if (st === 'skipped') {
+                        cardBg = 'border-amber-500/40 bg-amber-500/5';
+                        textStyle = 'line-through text-amber-300';
+                    }
+
+                    const checkBtnClass = st === 'completed'
+                        ? 'w-7 h-7 rounded-lg bg-emerald-500 text-slate-950 font-bold border border-emerald-400 flex items-center justify-center transition-all'
+                        : 'w-7 h-7 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-emerald-400 flex items-center justify-center transition-all';
+
+                    const skipBtnClass = st === 'skipped'
+                        ? 'w-7 h-7 rounded-lg bg-amber-500 text-slate-950 font-bold border border-amber-400 flex items-center justify-center transition-all'
+                        : 'w-7 h-7 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-amber-400 flex items-center justify-center transition-all';
+
+                    const itemCard = document.createElement('div');
+                    itemCard.className = `glass-card p-3.5 rounded-xl border transition-all flex items-center justify-between ${cardBg}`;
+
+                    itemCard.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-1">
+                                <button onclick="setZaytounaStatus(${item.id}, 'completed')" title="مكتمل" class="${checkBtnClass}">
+                                    <i class="fa-solid fa-check text-xs"></i>
+                                </button>
+                                <button onclick="setZaytounaStatus(${item.id}, 'skipped')" title="تسكيب" class="${skipBtnClass}">
+                                    <i class="fa-solid fa-forward text-xs"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 block">قسم زايتونة #${item.id}</span>
+                                <h4 class="text-xs font-bold ${textStyle}">${item.title}</h4>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-purple-300 bg-purple-500/10 px-2 py-1 rounded border border-purple-500/20 whitespace-nowrap">
+                            صـ ${item.page}
+                        </span>
+                    `;
+
+                    gridContainer.appendChild(itemCard);
+                });
+
+                area.appendChild(gridContainer);
+            }
+        }
+
+        // Tab Switcher Function
+        function switchTab(tab) {
+            appState.currentTab = tab;
+
+            const tabBtnDaily = document.getElementById('tabBtnDaily');
+            const tabBtnCrash = document.getElementById('tabBtnCrash');
+            const tabBtnRed = document.getElementById('tabBtnRed');
+            const tabBtnZaytouna = document.getElementById('tabBtnZaytouna');
+
+            const tabDailyContainer = document.getElementById('tabDailyContainer');
+            const tabCrashContainer = document.getElementById('tabCrashContainer');
+            const tabRedContainer = document.getElementById('tabRedContainer');
+            const tabZaytounaContainer = document.getElementById('tabZaytounaContainer');
+
+            // Reset Tab UI
+            [tabBtnDaily, tabBtnCrash, tabBtnRed, tabBtnZaytouna].forEach(b => {
+                b.classList.remove('active-tab');
+                b.classList.add('text-slate-400');
+            });
+
+            [tabDailyContainer, tabCrashContainer, tabRedContainer, tabZaytounaContainer].forEach(c => {
+                c.classList.add('hidden');
+            });
+
+            if (tab === 'daily') {
+                tabBtnDaily.classList.add('active-tab');
+                tabDailyContainer.classList.remove('hidden');
+            } else if (tab === 'crash') {
+                tabBtnCrash.classList.add('active-tab');
+                tabCrashContainer.classList.remove('hidden');
+            } else if (tab === 'red') {
+                tabBtnRed.classList.add('active-tab');
+                tabRedContainer.classList.remove('hidden');
+            } else if (tab === 'zaytouna') {
+                tabBtnZaytouna.classList.add('active-tab');
+                tabZaytounaContainer.classList.remove('hidden');
+            }
+        }
+
+        // Action Handlers for Statuses
+        function setTaskStatus(id, newStatus) {
+            const current = getStatus(appState.tasks[id]);
+            const next = (current === newStatus) ? 'pending' : newStatus;
+            appState.tasks[id] = next;
+            syncBidirectional('task', id, next);
+            showToast(`تم تحديث حالة المهمة اليومية بنجاح`);
+        }
+
+        function setCrashStatus(id, newStatus) {
+            const current = getStatus(appState.crash[id]);
+            const next = (current === newStatus) ? 'pending' : newStatus;
+            appState.crash[id] = next;
+            syncBidirectional('crash', id, next);
+            showToast(`تم تحديث حالة الكراش كورس بنجاح`);
+        }
+
+        function setRedStatus(id, newStatus) {
+            const current = getStatus(appState.red[id]);
+            const next = (current === newStatus) ? 'pending' : newStatus;
+            appState.red[id] = next;
+            syncBidirectional('red', id, next);
+            showToast(`تم تحديث القسم الأحمر #${id}`);
+        }
+
+        function setZaytounaStatus(id, newStatus) {
+            const current = getStatus(appState.zaytouna[id]);
+            const next = (current === newStatus) ? 'pending' : newStatus;
+            appState.zaytouna[id] = next;
+            syncBidirectional('zaytouna', id, next);
+            showToast(`تم تحديث قسم الزيتونة #${id}`);
+        }
+
+        // Quick Jump Navigation
+        function jumpToCrashGroup(group) {
+            appState.crashCategoryFilter = group;
+            switchTab('crash');
+            updateCrashCategoryBtns();
+            renderCrashCourseIndex();
+        }
+
+        function jumpToZaytounaTab(start, end) {
+            appState.searchQuery = '';
+            appState.zaytounaFilter = 'all';
+            switchTab('zaytouna');
+            renderZaytounaIndex();
+        }
+
+        function jumpToRedTab(start, end) {
+            appState.redSearchQuery = '';
+            appState.redFilter = 'all';
+            switchTab('red');
+            renderRedSectionsIndex();
+        }
+
+        function jumpToRedRange(start, end) {
+            appState.redSearchQuery = '';
+            appState.redFilter = 'all';
+            renderRedSectionsIndex();
+        }
+
+        function jumpToZaytounaRange(start, end) {
+            appState.searchQuery = '';
+            appState.zaytounaFilter = 'all';
+            renderZaytounaIndex();
+        }
+
+        // Filtering Functions for Crash Course
+        function filterCrashCategory(cat) {
+            appState.crashCategoryFilter = cat;
+            updateCrashCategoryBtns();
+            renderCrashCourseIndex();
+        }
+
+        function updateCrashCategoryBtns() {
+            const cat = appState.crashCategoryFilter;
+            const btnAll = document.getElementById('cCatAll');
+            const btnMain = document.getElementById('cCatMain');
+            const btnNew = document.getElementById('cCatNew');
+
+            [btnAll, btnMain, btnNew].forEach(b => {
+                b.className = 'c-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700';
+            });
+
+            if (cat === 'all') btnAll.className = 'c-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950';
+            else if (cat === 'main') btnMain.className = 'c-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950';
+            else if (cat === 'new') btnNew.className = 'c-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950';
+        }
+
+        function filterCrashStatus(st) {
+            appState.crashStatusFilter = st;
+            renderCrashCourseIndex();
+        }
+
+        function handleCrashSearch() {
+            appState.crashSearchQuery = document.getElementById('crashSearchInput').value;
+            renderCrashCourseIndex();
+        }
+
+        // Filter and Search handlers for Red Sections
+        function handleRedSearch() {
+            appState.redSearchQuery = document.getElementById('redSearchInput').value;
+            const btn = document.getElementById('clearRedSearchBtn');
+            if (appState.redSearchQuery) btn.classList.remove('hidden');
+            else btn.classList.add('hidden');
+            renderRedSectionsIndex();
+        }
+
+        function clearRedSearch() {
+            document.getElementById('redSearchInput').value = '';
+            appState.redSearchQuery = '';
+            document.getElementById('clearRedSearchBtn').classList.add('hidden');
+            renderRedSectionsIndex();
+        }
+
+        function filterRed(filter) {
+            appState.redFilter = filter;
+            renderRedSectionsIndex();
+        }
+
+        function setRedView(view) {
+            appState.redView = view;
+            renderRedSectionsIndex();
+        }
+
+        // Filter and Search handlers for Zaytouna
+        function handleZaytounaSearch() {
+            appState.searchQuery = document.getElementById('zaytounaSearchInput').value;
+            const btn = document.getElementById('clearSearchBtn');
+            if (appState.searchQuery) btn.classList.remove('hidden');
+            else btn.classList.add('hidden');
+            renderZaytounaIndex();
+        }
+
+        function clearSearch() {
+            document.getElementById('zaytounaSearchInput').value = '';
+            appState.searchQuery = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            renderZaytounaIndex();
+        }
+
+        function filterZaytouna(filter) {
+            appState.zaytounaFilter = filter;
+            renderZaytounaIndex();
+        }
+
+        function setZaytounaView(view) {
+            appState.zaytounaView = view;
+            renderZaytounaIndex();
+        }
+
+        function filterSchedule(filter) {
+            appState.scheduleFilter = filter;
+            renderDailySchedule();
+        }
+
+        function scrollToToday() {
+            switchTab('daily');
+            const todayIso = new Date().toISOString().split('T')[0];
+            const target = dailySchedule.find(d => d.isoDate === todayIso);
+            if (target) {
+                const el = document.getElementById(`card_${target.id}`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                showToast("اليوم ليس ضمن أيام الخطة الحالية المحددة");
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastBody').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        function confirmReset() {
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        function executeReset() {
+            appState.tasks = {};
+            appState.zaytouna = {};
+            appState.red = {};
+            appState.crash = {};
+            saveState();
+            closeResetModal();
+            updateAllStatsAndUI();
+            showToast("تم إعادة ضبط كافة التحديدات بنجاح");
+        }
+
+        function exportSummary() {
+            window.print();
+        }
+
+        // On Load Entry Point
+        window.onload = function() {
+            loadState();
+            initChart();
+            updateAllStatsAndUI();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<script>
+(function(){
+  try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}
+  catch(e){var m={};var st={getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null}};try{Object.defineProperty(window,'localStorage',{value:st,configurable:true});}catch(e2){}}
+  function modal(msg,buttons){
+    var o=document.createElement('div');
+    o.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl;font-family:inherit';
+    var c=document.createElement('div');
+    c.style.cssText='background:#fff;color:#111;border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.35);line-height:1.8;font-size:16px';
+    var p=document.createElement('div');p.textContent=msg;p.style.marginBottom='18px';c.appendChild(p);
+    var r=document.createElement('div');r.style.cssText='display:flex;gap:10px;justify-content:flex-start';
+    buttons.forEach(function(b){var x=document.createElement('button');x.textContent=b.t;x.style.cssText='padding:8px 20px;border-radius:10px;border:0;font:inherit;cursor:pointer;background:'+(b.p?'#2563eb':'#e5e7eb')+';color:'+(b.p?'#fff':'#111');x.onclick=function(){o.remove();if(b.f)b.f();};r.appendChild(x);});
+    c.appendChild(r);o.appendChild(c);document.body.appendChild(o);
+  }
+  window.alert=function(msg){modal(String(msg),[{t:'حسنًا',p:true}]);};
+  window.__ask=function(msg,yes){modal(String(msg),[{t:'نعم',p:true,f:yes},{t:'إلغاء'}]);};
+})();
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة اختبارات التناظر اللفظي الذكية</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 min-h-screen text-slate-100 flex flex-col justify-between">
+
+    <header class="bg-slate-900/80 backdrop-blur border-b border-slate-800 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-2xl shadow-md shadow-indigo-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">منصة التناظر اللفظي</h1>
+                    <p class="text-xs text-slate-400">تطبيق التدريب والمحاكاة الذكي</p>
+                </div>
+            </div>
+            
+            <nav class="flex flex-wrap gap-2">
+                <button onclick="switchTab('home')" id="nav-home" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-indigo-600 text-white shadow-lg shadow-indigo-600/30">الرئيسية</button>
+                <button onclick="switchTab('sections')" id="nav-sections" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-slate-800 hover:bg-slate-700 text-slate-300">الأقسام والأسئلة</button>
+                <button onclick="switchTab('exam')" id="nav-exam" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-slate-800 hover:bg-slate-700 text-slate-300">محاكي الاختبار</button>
+                <button onclick="switchTab('settings')" id="nav-settings" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-slate-800 hover:bg-slate-700 text-slate-300">رفع/تعديل الملف</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 w-full flex-grow">
+        
+        <!-- HOME VIEW -->
+        <div id="view-home" class="space-y-8 animate-fade">
+            <div class="relative overflow-hidden bg-gradient-to-r from-indigo-900/60 to-purple-900/60 border border-indigo-500/30 rounded-3xl p-8 sm:p-12 shadow-2xl">
+                <div class="relative z-10 max-w-2xl space-y-4">
+                    <span class="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-xs font-semibold border border-indigo-500/30">جاهز للتحدي؟</span>
+                    <h2 class="text-3xl sm:text-5xl font-black tracking-tight">أتقن أسئلة التناظر اللفظي بكل إحترافية</h2>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">تضم المنصة أسئلة قدرات شاملة مع تصحيح فوري ومعرفة الإجابات الصحيحة بناءً على نمط المسافات الذكي في الملف، بالإضافة إلى محاكي اختبار حقيقي.</p>
+                    <div class="flex flex-wrap gap-4 pt-4">
+                        <button onclick="switchTab('sections')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-2xl shadow-lg shadow-indigo-600/30 transition transform hover:-translate-y-0.5">ابدأ التدريب حسب الأقسام</button>
+                        <button onclick="startExam()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-3 rounded-2xl shadow-lg shadow-purple-600/30 transition transform hover:-translate-y-0.5">بدء محاكي الاختبار الآن</button>
+                    </div>
+                </div>
+                <div class="absolute -left-10 -bottom-10 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 text-center space-y-2">
+                    <div class="text-indigo-400 font-black text-3xl" id="stat-total">0</div>
+                    <div class="text-slate-400 text-sm font-medium">إجمالي الأسئلة المتاحة</div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 text-center space-y-2">
+                    <div class="text-purple-400 font-black text-3xl" id="stat-sections">0</div>
+                    <div class="text-slate-400 text-sm font-medium">عدد الأقسام (20 سؤال لكل قسم)</div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 text-center space-y-2">
+                    <div class="text-emerald-400 font-black text-3xl" id="stat-status">مكتشف بالمسافات</div>
+                    <div class="text-slate-400 text-sm font-medium">ذكاء كشف الإجابات</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTIONS VIEW -->
+        <div id="view-sections" class="hidden space-y-6 animate-fade">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold">أقسام التدريب</h2>
+                    <p class="text-slate-400 text-sm">اختر قسماً لبدء الإجابة ومعرفة الإجابات الصحيحة بشكل فوري</p>
+                </div>
+                <div class="w-full sm:w-auto">
+                    <input type="text" id="search-input" oninput="filterQuestions()" placeholder="ابحث في الأسئلة..." class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white w-full sm:w-64 focus:outline-none focus:border-indigo-500">
+                </div>
+            </div>
+
+            <!-- Sections List / Grid -->
+            <div id="sections-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Section Quiz View (Hidden by default) -->
+            <div id="section-quiz-view" class="hidden space-y-6">
+                <div class="flex items-center justify-between bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                    <button onclick="backToSections()" class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm font-semibold">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        العودة للأقسام
+                    </button>
+                    <h3 id="current-section-title" class="text-lg font-bold"></h3>
+                    <div class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30" id="section-progress">السؤال 1 من 20</div>
+                </div>
+
+                <div id="quiz-question-card" class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+                    <!-- Question and Choices rendered here -->
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <button onclick="prevQuestion()" id="btn-prev" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-5 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50">السابق</button>
+                    <button onclick="nextQuestion()" id="btn-next" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition">التالي</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXAM SIMULATOR VIEW -->
+        <div id="view-exam" class="hidden space-y-6">
+            <!-- Exam Intro Screen -->
+            <div id="exam-intro" class="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 max-w-2xl mx-auto text-center space-y-6 shadow-2xl">
+                <div class="w-16 h-16 bg-purple-600/20 border border-purple-500/30 rounded-2xl flex items-center justify-center mx-auto text-purple-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2m-6 9l2 2 4-4"/></svg>
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-bold">محاكي اختبار التناظر اللفظي</h2>
+                    <p class="text-slate-400 text-sm">اختبر قدراتك في بيئة محاكاة حقيقية مع وقت محدد ومراجعة شاملة لنتيجتك في نهاية الاختبار.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-right bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 text-sm">
+                    <div>عدد الأسئلة: <span class="font-bold text-indigo-400">25 سؤال عشوائي</span></div>
+                    <div>الوقت المحدد: <span class="font-bold text-purple-400">10 دقائق</span></div>
+                </div>
+                <button onclick="launchExam()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-purple-600/30 transition">بدء الاختبار الآن</button>
+            </div>
+
+            <!-- Active Exam Screen -->
+            <div id="exam-active" class="hidden space-y-6 max-w-3xl mx-auto">
+                <div class="flex justify-between items-center bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-lg">
+                    <div class="text-sm font-semibold text-slate-300" id="exam-counter">السؤال 1 من 25</div>
+                    <div class="flex items-center gap-2 bg-purple-500/20 border border-purple-500/30 text-purple-300 px-4 py-1.5 rounded-xl font-mono font-bold text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span id="exam-timer">10:00</span>
+                    </div>
+                </div>
+
+                <div id="exam-question-card" class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+                    <!-- Exam question rendered here -->
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <button onclick="examPrevQuestion()" id="exam-btn-prev" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-5 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50">السابق</button>
+                    <button onclick="examNextQuestion()" id="exam-btn-next" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition">التالي</button>
+                </div>
+            </div>
+
+            <!-- Exam Results Screen -->
+            <div id="exam-results" class="hidden bg-slate-900/90 border border-slate-800 rounded-3xl p-8 max-w-2xl mx-auto text-center space-y-6 shadow-2xl">
+                <div class="w-20 h-20 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto text-emerald-400 text-3xl font-black" id="exam-score-badge">
+                    85%
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-bold">نتيجة محاكي الاختبار</h2>
+                    <p class="text-slate-400 text-sm" id="exam-result-msg">لقد أنهيت الاختبار بنجاح تام!</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-center bg-slate-950/60 p-4 rounded-2xl border border-slate-800 text-sm">
+                    <div>الإجابات الصحيحة: <span class="font-bold text-emerald-400" id="res-correct">0</span></div>
+                    <div>الإجابات الخاطئة: <span class="font-bold text-rose-400" id="res-wrong">0</span></div>
+                </div>
+                <div class="flex gap-4 pt-2">
+                    <button onclick="startExam()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition">إعادة الاختبار</button>
+                    <button onclick="switchTab('sections')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl transition">العودة للأقسام</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS / UPLOAD VIEW -->
+        <div id="view-settings" class="hidden space-y-6 max-w-2xl mx-auto">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 space-y-6 shadow-2xl">
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-bold">رفع أو تعديل ملف الأسئلة (JSON)</h2>
+                    <p class="text-slate-400 text-sm">يعتمد التطبيق الآن على <strong>قاعدة كشف المسافات الذكية</strong> التي شرحتها (حيث تتميز الإجابة الصحيحة بمسافة مختلفة أو زائدة مقارنة بباقي الخيارات في الملف)، ويمكنك أيضاً لصق أي ملف JSON هنا.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-300 mb-2">اختر ملف JSON:</label>
+                        <input type="file" id="json-file-input" accept=".json,.txt" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer bg-slate-950 rounded-xl border border-slate-800">
+                    </div>
+
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-slate-800"></div>
+                        <span class="flex-shrink mx-4 text-slate-500 text-xs">أو لصق الكود مباشرة</span>
+                        <div class="flex-grow border-t border-slate-800"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-300 mb-2">محتوى JSON:</label>
+                        <textarea id="json-textarea" rows="8" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm text-slate-200 font-mono focus:outline-none focus:border-indigo-500" placeholder="الصق محتوى JSON هنا..."></textarea>
+                    </div>
+
+                    <button onclick="loadCustomJson()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition">حفظ وتحديث الأسئلة</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-900/80 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+        <p>منصة التناظر اللفظي الذكية &copy; 2026 - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script>
+        let defaultData = {
+          "tnazer": [
+            {
+              "id": "t1789651441488",
+              "type": "tnazer",
+              "question": "ثورة : بركان",
+              "choices": [
+                "مواء : قطة",
+                "نهر : ماء",
+                "غضب : إنسان",
+                "هديل : حمام"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651426595",
+              "type": "tnazer",
+              "question": "بحر : غرق",
+              "choices": [
+                "نار : حرق ( إحراق)",
+                "نهر : صيد"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651394712",
+              "type": "tnazer",
+              "question": "سبات : ليل",
+              "choices": [
+                "عمل : نهار",
+                "ضحى : نهار",
+                "سحور : فجر",
+                "طوف : إحرام"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651386613",
+              "type": "tnazer",
+              "question": "غوص : بحر",
+              "choices": [
+                "استزادة : علم",
+                "طالب : مدرس",
+                "ايداع : بنك"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651375041",
+              "type": "tnazer",
+              "question": "استنفار : الجيش",
+              "choices": [
+                "تشجيع : المدربين",
+                "تحفيز : المعلمين",
+                "حشد : الأفراد",
+                "تفريق : لاعبين"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651351789",
+              "type": "tnazer",
+              "question": "عمل : نهار",
+              "choices": [
+                "صوم : رمضان"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651341668",
+              "type": "tnazer",
+              "question": "حشد : مشجعين",
+              "choices": [
+                "تشجيع : مدربين",
+                "تفريق : متسولين",
+                "تحفيز : موظفين",
+                "جذب : سائقين"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651328203",
+              "type": "tnazer",
+              "question": "رضيع : مهد",
+              "choices": [
+                "نواة : تمر",
+                "إنسان : غلام",
+                "عش : بيض",
+                "صخرة : حصاة"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651316519",
+              "type": "tnazer",
+              "question": "خطبة : ذكر",
+              "choices": [
+                "كتابة : رسم",
+                "مدح : ذم",
+                "تهنئة : مهاتفة",
+                "مقال : وعظ"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651300813",
+              "type": "tnazer",
+              "question": "مبتسم : وجه",
+              "choices": [
+                "تفكير : عقل",
+                "رمش : عين",
+                "يد : ظفر"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651289501",
+              "type": "tnazer",
+              "question": "عاشوراء : محرم",
+              "choices": [
+                "رمضان : ليلة القدر",
+                "شوال : العيد",
+                "ذو الحجة : عرفة"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651276974",
+              "type": "tnazer",
+              "question": "قتل : حرب",
+              "choices": [
+                "نوم : سجن",
+                "إفحام : جدال",
+                "قائد : جندي"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651259601",
+              "type": "tnazer",
+              "question": "مشجعين : ملعب",
+              "choices": [
+                "رسالة : ظرف",
+                "طلاب : فسحة",
+                "قطار : سكة",
+                "عصفور : جو"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651248535",
+              "type": "tnazer",
+              "question": "نقود : مصرف",
+              "choices": [
+                "معهد : جامعة",
+                "شاي : سكر",
+                "عصفور : قفص",
+                "زبيب : عنب"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651232220",
+              "type": "tnazer",
+              "question": "ماء : بحر",
+              "choices": [
+                "تعلم : مدرسة",
+                "مطبخ : بيت"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651221109",
+              "type": "tnazer",
+              "question": "وريد : دم",
+              "choices": [
+                "bحر : سمك"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651212064",
+              "type": "tnazer",
+              "question": "رصاص : مسدس",
+              "choices": [
+                "نخلة : واحة"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651203480",
+              "type": "tnazer",
+              "question": "ضرس : فم(ضروس : فم)",
+              "choices": [
+                "عظام : ضلع",
+                "شمس : مجرة"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651192447",
+              "type": "tnazer",
+              "question": "كتيبة : جندي",
+              "choices": [
+                "ضابط : عسكري",
+                "ملازم : سرية",
+                "جيش : مدافع",
+                "سلاح : جيش"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            },
+            {
+              "id": "t1789651170013",
+              "type": "tnazer",
+              "question": "وادي : صحراء",
+              "choices": [
+                "ماء : نهر",
+                "طبيب : سماعة",
+                "شاحنة : سيارة",
+                "مكحلة : عين"
+              ],
+              "sectionId": null,
+              "imageUrl": null
+            }
+          ]
+        };
+
+        let allQuestions = [];
+        let sections = [];
+        
+        let currentSectionIndex = 0;
+        let currentSectionQuestions = [];
+        let currentQuestionIdx = 0;
+        let userAnswers = {};
+
+        let examQuestions = [];
+        let examCurrentIdx = 0;
+        let examAnswers = {};
+        let examTimerInterval = null;
+        let examSecondsLeft = 600;
+
+        function getCorrectChoiceIndex(q) {
+            // 1. Check user's explicit correct property if defined
+            if (q.correct !== undefined) return q.correct;
+            if (q.correctIndex !== undefined) return q.correctIndex;
+
+            // 2. Check spacing heuristic (leading/trailing spaces or double spaces that signify the correct answer)
+            for (let i = 0; i < q.choices.length; i++) {
+                let c = q.choices[i];
+                if (c !== c.trim() || c.includes('  ')) {
+                    return i;
+                }
+            }
+
+            // 3. Fallback to parentheses or first option
+            for (let i = 0; i < q.choices.length; i++) {
+                if (q.choices[i].includes('(')) return i;
+            }
+            return 0;
+        }
+
+        function initApp() {
+            let saved = localStorage.getItem('tnazer_questions');
+            if (saved) {
+                try {
+                    let parsed = JSON.parse(saved);
+                    allQuestions = parsed.tnazer || parsed;
+                } catch(e) {
+                    allQuestions = defaultData.tnazer;
+                }
+            } else {
+                allQuestions = defaultData.tnazer;
+            }
+
+            document.getElementById('json-textarea').value = JSON.stringify({ tnazer: allQuestions }, null, 2);
+
+            buildSections();
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = allQuestions.length;
+            document.getElementById('stat-sections').innerText = sections.length;
+        }
+
+        function buildSections() {
+            sections = [];
+            let chunkSize = 20;
+            for (let i = 0; i < allQuestions.length; i += chunkSize) {
+                sections.push(allQuestions.slice(i, i + chunkSize));
+            }
+            renderSectionsGrid();
+        }
+
+        function renderSectionsGrid() {
+            let container = document.getElementById('sections-container');
+            container.innerHTML = '';
+            
+            sections.forEach((sec, idx) => {
+                let card = document.createElement('div');
+                card.className = 'bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 transition flex flex-col justify-between space-y-4 shadow-lg group cursor-pointer';
+                card.onclick = () => openSection(idx);
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-semibold bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30">القسم ${idx + 1}</span>
+                            <span class="text-xs text-slate-400">${sec.length} سؤال</span>
+                        </div>
+                        <h3 class="text-lg font-bold group-hover:text-indigo-400 transition">اختبار التناظر اللفظي - الجزء ${idx + 1}</h3>
+                        <p class="text-xs text-slate-400 line-clamp-2">أمثلة: ${sec[0] ? sec[0].question : ''}، ${sec[1] ? sec[1].question : ''}</p>
+                    </div>
+                    <button class="w-full bg-slate-800 group-hover:bg-indigo-600 text-slate-200 group-hover:text-white font-semibold py-2.5 rounded-xl text-sm transition">بدء القسم</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function switchTab(tabId) {
+            ['home', 'sections', 'exam', 'settings'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                let navBtn = document.getElementById(`nav-${t}`);
+                if(navBtn) {
+                    navBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition bg-slate-800 hover:bg-slate-700 text-slate-300";
+                }
+            });
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            let activeNav = document.getElementById(`nav-${tabId}`);
+            if(activeNav) {
+                activeNav.className = "px-4 py-2 rounded-xl text-sm font-semibold transition bg-indigo-600 text-white shadow-lg shadow-indigo-600/30";
+            }
+
+            if (tabId !== 'sections') {
+                document.getElementById('sections-container').classList.remove('hidden');
+                document.getElementById('section-quiz-view').classList.add('hidden');
+            }
+
+            if (tabId !== 'exam' && examTimerInterval) {
+                clearInterval(examTimerInterval);
+            }
+        }
+
+        function openSection(secIdx) {
+            currentSectionIndex = secIdx;
+            currentSectionQuestions = sections[secIdx];
+            currentQuestionIdx = 0;
+            userAnswers = {};
+
+            document.getElementById('sections-container').classList.add('hidden');
+            document.getElementById('section-quiz-view').classList.remove('hidden');
+            document.getElementById('current-section-title').innerText = `القسم التدريبي رقم ${secIdx + 1}`;
+
+            renderQuestion();
+        }
+
+        function backToSections() {
+            document.getElementById('section-quiz-view').classList.add('hidden');
+            document.getElementById('sections-container').classList.remove('hidden');
+        }
+
+        function renderQuestion() {
+            let q = currentSectionQuestions[currentQuestionIdx];
+            document.getElementById('section-progress').innerText = `السؤال ${currentQuestionIdx + 1} من ${currentSectionQuestions.length}`;
+            
+            let card = document.getElementById('quiz-question-card');
+            let correctIdx = getCorrectChoiceIndex(q);
+            
+            let choicesHtml = '';
+            q.choices.forEach((choice, cIdx) => {
+                let isSelected = userAnswers[q.id] === cIdx;
+                let answered = userAnswers[q.id] !== undefined;
+                let isCorrect = (cIdx === correctIdx);
+                
+                // Display choice trimmed for clean UI
+                let cleanChoice = choice.trim();
+                
+                let btnClass = "w-full text-right p-4 rounded-2xl border transition text-sm sm:text-base font-semibold flex justify-between items-center ";
+                if (!answered) {
+                    btnClass += "bg-slate-950/60 border-slate-800 hover:border-indigo-500 text-slate-200";
+                } else {
+                    if (isCorrect) {
+                        btnClass += "bg-emerald-950/40 border-emerald-500/80 text-emerald-200";
+                    } else if (isSelected && !isCorrect) {
+                        btnClass += "bg-rose-950/40 border-rose-500/80 text-rose-200";
+                    } else {
+                        btnClass += "bg-slate-950/40 border-slate-800 text-slate-400 opacity-60";
+                    }
+                }
+
+                choicesHtml += `
+                    <button onclick="selectChoice('${q.id}', ${cIdx})" class="${btnClass}">
+                        <span>${cleanChoice}</span>
+                        ${answered && isCorrect ? '<span class="text-xs bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-lg border border-emerald-500/30">الإجابة الصحيحة</span>' : ''}
+                        ${answered && isSelected && !isCorrect ? '<span class="text-xs bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded-lg border border-rose-500/30">إجابتك</span>' : ''}
+                    </button>
+                `;
+            });
+
+            card.innerHTML = `
+                <div class="space-y-3">
+                    <span class="text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">تناظر لفظي (كشف بالمسافات الذكية)</span>
+                    <h4 class="text-xl sm:text-2xl font-black text-white">${q.question}</h4>
+                </div>
+                <div class="space-y-3 pt-4">
+                    ${choicesHtml}
+                </div>
+                ${userAnswers[q.id] !== undefined ? `
+                    <div class="bg-indigo-950/40 border border-indigo-500/30 p-4 rounded-2xl text-xs sm:text-sm text-indigo-200 space-y-1">
+                        <span class="font-bold block">💡 توضيح اكتشاف الإجابة:</span>
+                        <p>تم تحديد الإجابة الصحيحة تلقائياً بدقة بناءً على نمط المسافات (المسافة الزائدة في نص الخيار داخل ملف الـ JSON).</p>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('btn-prev').disabled = currentQuestionIdx === 0;
+            document.getElementById('btn-next').innerText = currentQuestionIdx === currentSectionQuestions.length - 1 ? 'إنهاء القسم' : 'التالي';
+        }
+
+        function selectChoice(qId, cIdx) {
+            if (userAnswers[qId] !== undefined) return;
+            userAnswers[qId] = cIdx;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIdx > 0) {
+                currentQuestionIdx--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIdx < currentSectionQuestions.length - 1) {
+                currentQuestionIdx++;
+                renderQuestion();
+            } else {
+                backToSections();
+            }
+        }
+
+        function startExam() {
+            switchTab('exam');
+            document.getElementById('exam-intro').classList.remove('hidden');
+            document.getElementById('exam-active').classList.add('hidden');
+            document.getElementById('exam-results').classList.add('hidden');
+        }
+
+        function launchExam() {
+            let shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+            examQuestions = shuffled.slice(0, Math.min(25, allQuestions.length));
+            examCurrentIdx = 0;
+            examAnswers = {};
+            examSecondsLeft = 600;
+
+            document.getElementById('exam-intro').classList.add('hidden');
+            document.getElementById('exam-active').classList.remove('hidden');
+
+            renderExamQuestion();
+            startExamTimer();
+        }
+
+        function startExamTimer() {
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            examTimerInterval = setInterval(() => {
+                examSecondsLeft--;
+                let m = Math.floor(examSecondsLeft / 60);
+                let s = examSecondsLeft % 60;
+                document.getElementById('exam-timer').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                if (examSecondsLeft <= 0) {
+                    clearInterval(examTimerInterval);
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function renderExamQuestion() {
+            let q = examQuestions[examCurrentIdx];
+            document.getElementById('exam-counter').innerText = `السؤال ${examCurrentIdx + 1} من ${examQuestions.length}`;
+            
+            let card = document.getElementById('exam-question-card');
+            let choicesHtml = '';
+            
+            q.choices.forEach((choice, cIdx) => {
+                let isSelected = examAnswers[q.id] === cIdx;
+                let cleanChoice = choice.trim();
+                let btnClass = "w-full text-right p-4 rounded-2xl border transition text-sm sm:text-base font-semibold flex justify-between items-center ";
+                if (isSelected) {
+                    btnClass += "bg-indigo-600/30 border-indigo-500 text-white shadow-lg shadow-indigo-600/20";
+                } else {
+                    btnClass += "bg-slate-950/60 border-slate-800 hover:border-indigo-500 text-slate-200";
+                }
+
+                choicesHtml += `
+                    <button onclick="selectExamChoice('${q.id}', ${cIdx})" class="${btnClass}">
+                        <span>${cleanChoice}</span>
+                        <div class="w-5 h-5 rounded-full border ${isSelected ? 'bg-indigo-500 border-indigo-400' : 'border-slate-600'} flex items-center justify-center">
+                            ${isSelected ? '<div class="w-2 h-2 bg-white rounded-full"></div>' : ''}
+                        </div>
+                    </button>
+                `;
+            });
+
+            card.innerHTML = `
+                <div class="space-y-3">
+                    <span class="text-xs font-semibold text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">محاكي الاختبار</span>
+                    <h4 class="text-xl sm:text-2xl font-black text-white">${q.question}</h4>
+                </div>
+                <div class="space-y-3 pt-4">
+                    ${choicesHtml}
+                </div>
+            `;
+
+            document.getElementById('exam-btn-prev').disabled = examCurrentIdx === 0;
+            document.getElementById('exam-btn-next').innerText = examCurrentIdx === examQuestions.length - 1 ? 'تسليم الاختبار' : 'التالي';
+        }
+
+        function selectExamChoice(qId, cIdx) {
+            examAnswers[qId] = cIdx;
+            renderExamQuestion();
+        }
+
+        function examPrevQuestion() {
+            if (examCurrentIdx > 0) {
+                examCurrentIdx--;
+                renderExamQuestion();
+            }
+        }
+
+        function examNextQuestion() {
+            if (examCurrentIdx < examQuestions.length - 1) {
+                examCurrentIdx++;
+                renderExamQuestion();
+            } else {
+                submitExam();
+            }
+        }
+
+        function submitExam() {
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            
+            let correctCount = 0;
+            examQuestions.forEach(q => {
+                let userChoice = examAnswers[q.id];
+                if (userChoice !== undefined) {
+                    let correctIdx = getCorrectChoiceIndex(q);
+                    if (userChoice === correctIdx) {
+                        correctCount++;
+                    }
+                }
+            });
+
+            let wrongCount = examQuestions.length - correctCount;
+            let percentage = Math.round((correctCount / examQuestions.length) * 100);
+
+            document.getElementById('exam-active').classList.add('hidden');
+            document.getElementById('exam-results').classList.remove('hidden');
+
+            document.getElementById('exam-score-badge').innerText = `${percentage}%`;
+            document.getElementById('res-correct').innerText = correctCount;
+            document.getElementById('res-wrong').innerText = wrongCount;
+
+            let msg = "أداء ممتاز! واصل التدريب لتحافظ على تميزك.";
+            if (percentage < 50) msg = "تحتاج إلى مزيد من التدريب والمراجعة في أقسام التناظر اللفظي.";
+            document.getElementById('exam-result-msg').innerText = msg;
+        }
+
+        function loadCustomJson() {
+            let text = document.getElementById('json-textarea').value;
+            try {
+                let parsed = JSON.parse(text);
+                allQuestions = parsed.tnazer || parsed;
+                localStorage.setItem('tnazer_questions', JSON.stringify({ tnazer: allQuestions }));
+                buildSections();
+                updateStats();
+                switchTab('sections');
+            } catch(e) {
+                alert('خطأ في صيغة JSON. تأكد من صحة الأقواس والبيانات.');
+            }
+        }
+
+        document.getElementById('json-file-input').addEventListener('change', function(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('json-textarea').value = evt.target.result;
+                loadCustomJson();
+            };
+            reader.readAsText(file);
+        });
+
+        function filterQuestions() {
+            let query = document.getElementById('search-input').value.toLowerCase();
+            if (!query) {
+                renderSectionsGrid();
+                return;
+            }
+            let filtered = allQuestions.filter(q => q.question.toLowerCase().includes(query) || q.choices.some(c => c.toLowerCase().includes(query)));
+            let container = document.getElementById('sections-container');
+            container.innerHTML = '';
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">لا توجد نتائج مطابقة لبحثك</div>`;
+                return;
+            }
+
+            let card = document.getElementById('col-span-full') || document.createElement('div');
+            card.className = 'col-span-full bg-slate-900/80 border border-indigo-500/50 rounded-2xl p-6 space-y-4';
+            card.innerHTML = `<h3 class="font-bold text-indigo-400">نتائج البحث (${filtered.length} سؤال)</h3>`;
+            
+            let list = document.createElement('div');
+            list.className = 'space-y-2';
+            filtered.forEach((q, idx) => {
+                let item = document.createElement('div');
+                item.className = 'bg-slate-950 p-4 rounded-xl border border-slate-800 text-sm flex justify-between items-center';
+                item.innerHTML = `<span class="font-bold">${idx + 1}. ${q.question}</span> <span class="text-xs text-slate-400">${q.choices.length} خيارات</span>`;
+                list.appendChild(item);
+            });
+            card.appendChild(list);
+            container.appendChild(card);
+        }
+
+        window.onload = function() {
+            initApp();
+        };
+    </script>
+
+</body>
+</html>
