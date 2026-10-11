@@ -27,5 +27,4 @@
 
 ### 🌐 تواصل معي
 * **البريد الإلكتروني:** [Mujtaba0Albashrawi@gmail.com](mailto:Mujtaba0Albashrawi@gmail.com)
-* **يوتيوب:** [@i.albashrawi](https://youtube.com/@i.albashrawi)
 * **لينكدإن:** [albashrawi](https://linkedin.com/in/albashrawi)
