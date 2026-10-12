@@ -114,6 +114,21 @@ section { padding: 84px 0; }
 .tl-card .pic img.logo-b { position: absolute; bottom: 12px; inset-inline-start: 12px; width: 56px; height: 56px; border-radius: 14px; background: #fff; padding: 5px; object-fit: contain; }
 .soon { position: absolute; top: 12px; inset-inline-end: 12px; background: var(--accent); color: #fff; padding: 0 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600; }
 .tl-card.nopic .txt { padding-top: 14px; }
+.tl-card .pic.score { display: flex; align-items: center; justify-content: space-around; gap: 16px; padding: 18px; }
+.sc-ring { position: relative; width: 38%; max-width: 170px; aspect-ratio: 1; flex: none; }
+.sc-ring svg { width: 100%; height: 100%; }
+.sc-ring circle { fill: none; stroke-width: 9; }
+.sc-trk { stroke: var(--line); }
+.sc-prg { stroke: var(--accent); stroke-dashoffset: var(--full); transition: stroke-dashoffset 1.4s ease; }
+.tl-item.on .sc-prg { stroke-dashoffset: var(--off); }
+.sc-n { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; line-height: 1.25; }
+.sc-n b { font-size: clamp(28px, 5vw, 44px); font-weight: 700; }
+.sc-n span { font-size: 12.5px; color: var(--muted); }
+.sc-side { flex: 1; display: grid; gap: 14px; }
+.sc-row > div:first-child { display: flex; justify-content: space-between; font-size: 14.5px; color: var(--muted); }
+.sc-row b { color: var(--ink); font-weight: 600; }
+.sc-bar { height: 6px; background: var(--line); border-radius: 6px; margin-top: 6px; overflow: hidden; }
+.sc-bar i { display: block; height: 100%; background: var(--accent); border-radius: 6px; }
 .tl-card .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .tl-card .txt { padding: 20px 12px 0; }
 .year { display: inline-block; padding: 1px 16px; border-radius: 999px; background: var(--accent-tint); color: var(--accent); font-weight: 600; font-size: 15px; }
@@ -575,6 +590,12 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   if (calm) { el.textContent = roles[0]; } else { type(); }
 
   /* ---- المسيرة: عدّل المحطات هنا (سنة، عنوان، وصف) ---- */
+  function arn(n) { return Number(n).toLocaleString('ar-EG', { minimumFractionDigits: (n % 1) ? 1 : 0 }); }
+  function scoreHtml(s) {
+    var C = 2 * Math.PI * 52, off = (C * (1 - s.total / 100)).toFixed(1);
+    function row(n, v) { return '<div class="sc-row"><div><span>' + n + '</span><b>' + arn(v) + '/١٠٠</b></div><div class="sc-bar"><i style="width:' + v + '%"></i></div></div>'; }
+    return '<div class="pic score"><div class="sc-ring"><svg viewBox="0 0 120 120"><circle class="sc-trk" cx="60" cy="60" r="52"/><circle class="sc-prg" cx="60" cy="60" r="52" transform="rotate(-90 60 60)" style="stroke-dasharray:' + C.toFixed(1) + ';--full:' + C.toFixed(1) + ';--off:' + off + '"/></svg><div class="sc-n"><b>' + arn(s.total) + '</b><span>الدرجة الكلية</span></div></div><div class="sc-side">' + row('الكمي', s.q) + row('اللفظي', s.v) + '</div></div>';
+  }
   var journey = [
     { y: 'الطفولة', t: 'أصل الحكاية', d: 'بدأت الحكاية في القطيف، ومن صغري وأنا أحب الألعاب والكمبيوتر.' },
     { y: 'الابتدائي', t: 'أول محاولة برمجة', d: 'في الابتدائي حاولت أبرمج على كمبيوتر Core 2 Duo وضعه سيء، بس جربت، وكانت هذي البداية.' },
@@ -584,13 +605,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     { y: '٢٠٢٥ / ٢٠٢٦', t: 'الانضمام لجامعة الملك فيصل', d: 'دخلت كلية الحاسب في جامعة الملك فيصل، وبدأت بالسنة التحضيرية.', img: 'bldg', pos: '50% 38%', logo: 'kfulogo' },
     { y: '٢٠٢٦', t: 'أول خادم شخصي (Home Server)', d: 'حوّلت جهاز كمبيوتر إلى سيرفر محلي بـ Ubuntu Server وDocker، واستضفت عليه خادم Minecraft مخصص.' },
     { y: '٢٠٢٦', t: 'التفرغ للهدف الأسمى', d: 'قررت أنسحب بعد السنة التحضيرية، وأركّز كل طاقتي على المذاكرة لتحقيق شروط القبول في جامعة الملك فهد للبترول والمعادن.', img: 'kfupm', pos: '50% 50%', logo: 'kfupmlogo', soon: true },
-    { y: 'اليوم', t: 'مستمر في الطريق', d: 'أذاكر بتركيز عشان أدخل جامعة البترول، وأطوّر مشاريعي بجانب ذلك.', now: true }
+    { y: '١٢ أكتوبر ٢٠٢٦', t: 'نتيجة القدرات: ٩٨', d: 'كانت الفرصة الخامسة، وهي آخر فرصة مضمونة عندي وأملي الأخير. اختبرت يوم الأربعاء ٧ أكتوبر وانتظرت خمسة أيام (الجمعة والسبت إجازة عند سديد)، ونزلت النتيجة يوم الإثنين الساعة ١:٢٥ الظهر، وكانت من أسعد أيامي.', score: { total: 98, q: 100, v: 96.5 } },
+    { y: 'اليوم', t: 'مستمر في الطريق', d: 'بديت أذاكر للتحصيلي المبكر من ثاني يوم بعد اختبار القدرات تقريباً، وهدفي أدخل جامعة الملك فهد للبترول والمعادن.', now: true }
   ];
   var tl = document.getElementById('tl'), fill = document.getElementById('tlfill');
   journey.forEach(function (j) {
     var item = document.createElement('div');
     item.className = 'tl-item' + (j.now ? ' now' : '');
-    item.innerHTML = '<span class="tl-node"></span><div class="tl-card' + (j.img ? '' : ' nopic') + '">' + (j.img ? '<div class="pic"><img data-img="' + j.img + '" alt="' + j.t + '" style="object-position:' + (j.pos || '50% 50%') + '">' + (j.logo ? '<img class="logo-b" data-img="' + j.logo + '" alt="">' : '') + (j.soon ? '<span class="soon">قريباً إن شاء الله</span>' : '') + '</div>' : '') +
+    item.innerHTML = '<span class="tl-node"></span><div class="tl-card' + ((j.img || j.score) ? '' : ' nopic') + '">' + (j.score ? scoreHtml(j.score) : '') + (j.img ? '<div class="pic"><img data-img="' + j.img + '" alt="' + j.t + '" style="object-position:' + (j.pos || '50% 50%') + '">' + (j.logo ? '<img class="logo-b" data-img="' + j.logo + '" alt="">' : '') + (j.soon ? '<span class="soon">قريباً إن شاء الله</span>' : '') + '</div>' : '') +
       '<div class="txt"><span class="year">' + j.y + '</span><h3>' + j.t + '</h3><p>' + j.d + '</p></div></div>';
     tl.appendChild(item);
   });
