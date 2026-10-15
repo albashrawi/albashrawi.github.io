@@ -114,6 +114,27 @@ section { padding: 84px 0; }
 .tl-card .pic img.logo-b { position: absolute; bottom: 12px; inset-inline-start: 12px; width: 56px; height: 56px; border-radius: 14px; background: #fff; padding: 5px; object-fit: contain; }
 .soon { position: absolute; top: 12px; inset-inline-end: 12px; background: var(--accent); color: #fff; padding: 0 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600; }
 .tl-card.nopic .txt { padding-top: 14px; }
+.tl-card { position: relative; }
+.tl-card.hasgal { padding-bottom: 64px; }
+.gal-btn { position: absolute; bottom: 14px; left: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; transition: border-color .2s, color .2s; }
+.gal-btn:hover { border-color: var(--accent); color: var(--accent); }
+.gal-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.lb { position: fixed; inset: 0; z-index: 100; background: rgba(10,10,14,.97); display: grid; grid-template-columns: 56px 1fr 56px; align-items: center; justify-items: center; padding: calc(env(safe-area-inset-top, 0px) + 56px) 12px calc(env(safe-area-inset-bottom, 0px) + 40px); }
+.lb[hidden] { display: none; }
+.lb-fig { margin: 0; text-align: center; min-width: 0; }
+.lb-fig img { max-width: 100%; max-height: 70vh; border-radius: 16px; background: var(--surface); }
+.lb-fig figcaption { color: var(--muted); margin-top: 14px; font-size: 16px; }
+.lb-x { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 14px); inset-inline-start: 14px; }
+.lb-x, .lb-nav { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--raised); color: var(--ink); font-size: 24px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.lb-x:hover, .lb-nav:hover { background: var(--accent); color: #fff; }
+.lb-nav[hidden] { display: none; }
+.lb-count { position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); left: 0; right: 0; text-align: center; color: var(--muted); font-size: 14px; }
+@media (max-width: 560px) { .lb { grid-template-columns: 40px 1fr 40px; } .lb-nav { width: 38px; height: 38px; } }
+.tl-card .pic.prog { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 18px 28px; }
+.pg-n { font-size: clamp(40px, 7vw, 60px); font-weight: 700; line-height: 1.1; }
+.pg-bar { width: 100%; height: 10px; border-radius: 10px; background: var(--line); overflow: hidden; }
+.pg-bar i { display: block; height: 100%; background: var(--accent); border-radius: 10px; }
+.pg-l { color: var(--muted); font-size: 15px; }
 .tl-card .pic.score { display: flex; align-items: center; justify-content: space-around; gap: 16px; padding: 18px; }
 .sc-ring { position: relative; width: 38%; max-width: 170px; aspect-ratio: 1; flex: none; }
 .sc-ring svg { width: 100%; height: 100%; }
@@ -540,6 +561,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   </section>
 </main>
 
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="صور المحطة" hidden>
+  <button type="button" class="lb-x" id="lbX" aria-label="إغلاق">✕</button>
+  <button type="button" class="lb-nav lb-prev" id="lbPrev" aria-label="السابق">‹</button>
+  <figure class="lb-fig"><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure>
+  <button type="button" class="lb-nav lb-next" id="lbNext" aria-label="التالي">›</button>
+  <div class="lb-count" id="lbCount"></div>
+</div>
+
 <footer>
   <div class="wrap">
     <span>© ٢٠٢٦ مجتبى البشراوي</span>
@@ -590,7 +619,34 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   if (calm) { el.textContent = roles[0]; } else { type(); }
 
   /* ---- المسيرة: عدّل المحطات هنا (سنة، عنوان، وصف) ---- */
+  var lb = document.getElementById('lb'), lbImg = document.getElementById('lbImg'), lbCap = document.getElementById('lbCap'), lbCount = document.getElementById('lbCount');
+  var lbItems = [], lbI = 0, lbFrom = null;
+  function lbShow() {
+    var it = lbItems[lbI]; lbImg.src = it.src; lbImg.alt = it.cap || ''; lbCap.textContent = it.cap || '';
+    lbCount.textContent = arn(lbI + 1) + ' / ' + arn(lbItems.length);
+    document.getElementById('lbNext').hidden = document.getElementById('lbPrev').hidden = lbItems.length < 2;
+  }
+  function openLb(items, i, from) { lbItems = items; lbI = i || 0; lbFrom = from; lb.hidden = false; document.body.style.overflow = 'hidden'; lbShow(); document.getElementById('lbX').focus(); }
+  function closeLb() { lb.hidden = true; document.body.style.overflow = ''; if (lbFrom) lbFrom.focus(); }
+  function stepLb(d) { lbI = (lbI + d + lbItems.length) % lbItems.length; lbShow(); }
+  document.getElementById('lbX').addEventListener('click', closeLb);
+  document.getElementById('lbNext').addEventListener('click', function () { stepLb(1); });
+  document.getElementById('lbPrev').addEventListener('click', function () { stepLb(-1); });
+  lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
+  document.addEventListener('keydown', function (e) {
+    if (lb.hidden) return;
+    if (e.key === 'Escape') closeLb();
+    else if (e.key === 'ArrowLeft') stepLb(1);
+    else if (e.key === 'ArrowRight') stepLb(-1);
+  });
+  var tx = null;
+  lb.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', function (e) { if (tx === null) return; var dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50 && lbItems.length > 1) stepLb(dx < 0 ? 1 : -1); tx = null; });
+
   function arn(n) { return Number(n).toLocaleString('ar-EG', { minimumFractionDigits: (n % 1) ? 1 : 0 }); }
+  function progHtml(p) {
+    return '<div class="pic prog"><div class="pg-n">' + arn(p.pct) + '٪</div><div class="pg-bar"><i style="width:' + p.pct + '%"></i></div><div class="pg-l">' + p.label + '</div></div>';
+  }
   function scoreHtml(s) {
     var C = 2 * Math.PI * 52, off = (C * (1 - s.total / 100)).toFixed(1);
     function row(n, v) { return '<div class="sc-row"><div><span>' + n + '</span><b>' + arn(v) + '/١٠٠</b></div><div class="sc-bar"><i style="width:' + v + '%"></i></div></div>'; }
@@ -605,15 +661,26 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     { y: '٢٠٢٥ / ٢٠٢٦', t: 'الانضمام لجامعة الملك فيصل', d: 'دخلت كلية الحاسب في جامعة الملك فيصل، وبدأت بالسنة التحضيرية.', img: 'bldg', pos: '50% 38%', logo: 'kfulogo' },
     { y: '٢٠٢٦', t: 'أول خادم شخصي (Home Server)', d: 'حوّلت جهاز كمبيوتر إلى سيرفر محلي بـ Ubuntu Server وDocker، واستضفت عليه خادم Minecraft مخصص.' },
     { y: '٢٠٢٦', t: 'التفرغ للهدف الأسمى', d: 'قررت أنسحب بعد السنة التحضيرية، وأركّز كل طاقتي على المذاكرة لتحقيق شروط القبول في جامعة الملك فهد للبترول والمعادن.', img: 'kfupm', pos: '50% 50%', logo: 'kfupmlogo', soon: true },
-    { y: '١٢ أكتوبر ٢٠٢٦', t: 'نتيجة القدرات: ٩٨', d: 'كانت الفرصة الخامسة، وهي آخر فرصة مضمونة عندي وأملي الأخير. اختبرت يوم الأربعاء ٧ أكتوبر وانتظرت خمسة أيام (الجمعة والسبت إجازة عند سديد)، ونزلت النتيجة يوم الإثنين الساعة ١:٢٥ الظهر، وكانت من أسعد أيامي.', score: { total: 98, q: 100, v: 96.5 } },
+    { y: '١٢ أكتوبر ٢٠٢٦', t: 'نتيجة القدرات: ٩٨', d: 'كانت الفرصة الخامسة، وهي آخر فرصة مضمونة عندي وأملي الأخير. اختبرت يوم الأربعاء ٧ أكتوبر وانتظرت خمسة أيام (الجمعة والسبت إجازة عند سديد)، ونزلت النتيجة يوم الإثنين الساعة ١:٢٥ الظهر، وكانت من أسعد أيامي.', score: { total: 98, q: 100, v: 96.5 },
+      gallery: [{ src: 'assets/memories/gat-result-1.jpg', cap: 'تفاصيل نتيجة القدرات: ٩٨ من ١٠٠' }, { src: 'assets/memories/gat-result-2.jpg', cap: 'درجة الكمي ١٠٠ ودرجة اللفظي ٩٦٫٥' }] },
+    { y: '١٥ أكتوبر ٢٠٢٦', t: 'خلصت الرياضيات', d: 'يوم ١٥ أكتوبر الساعة ١٢:٥٩ الظهر خلصت مادة الرياضيات (كتاب التأسيس) في مذاكرتي للتحصيلي المبكر.', prog: { label: 'تأسيس الرياضيات', pct: 100 },
+      gallery: [{ src: 'assets/memories/math-1.jpg', cap: 'صفحة نهاية التأسيس في كتاب الرياضيات (منصة يلو التعليمية)' }] },
     { y: 'اليوم', t: 'مستمر في الطريق', d: 'بديت أذاكر للتحصيلي المبكر من ثاني يوم بعد اختبار القدرات تقريباً، وهدفي أدخل جامعة الملك فهد للبترول والمعادن.', now: true }
   ];
   var tl = document.getElementById('tl'), fill = document.getElementById('tlfill');
   journey.forEach(function (j) {
     var item = document.createElement('div');
     item.className = 'tl-item' + (j.now ? ' now' : '');
-    item.innerHTML = '<span class="tl-node"></span><div class="tl-card' + ((j.img || j.score) ? '' : ' nopic') + '">' + (j.score ? scoreHtml(j.score) : '') + (j.img ? '<div class="pic"><img data-img="' + j.img + '" alt="' + j.t + '" style="object-position:' + (j.pos || '50% 50%') + '">' + (j.logo ? '<img class="logo-b" data-img="' + j.logo + '" alt="">' : '') + (j.soon ? '<span class="soon">قريباً إن شاء الله</span>' : '') + '</div>' : '') +
+    item.innerHTML = '<span class="tl-node"></span><div class="tl-card' + ((j.img || j.score || j.prog) ? '' : ' nopic') + '">' + (j.score ? scoreHtml(j.score) : '') + (j.prog ? progHtml(j.prog) : '') + (j.img ? '<div class="pic"><img data-img="' + j.img + '" alt="' + j.t + '" style="object-position:' + (j.pos || '50% 50%') + '">' + (j.logo ? '<img class="logo-b" data-img="' + j.logo + '" alt="">' : '') + (j.soon ? '<span class="soon">قريباً إن شاء الله</span>' : '') + '</div>' : '') +
       '<div class="txt"><span class="year">' + j.y + '</span><h3>' + j.t + '</h3><p>' + j.d + '</p></div></div>';
+    if (j.gallery && j.gallery.length) {
+      var gcard = item.querySelector('.tl-card'); gcard.classList.add('hasgal');
+      var gb = document.createElement('button'); gb.type = 'button'; gb.className = 'gal-btn';
+      gb.setAttribute('aria-label', 'عرض صور هذي المحطة (' + arn(j.gallery.length) + ')');
+      gb.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg><span>' + arn(j.gallery.length) + '</span>';
+      gb.addEventListener('click', function () { openLb(j.gallery, 0, gb); });
+      gcard.appendChild(gb);
+    }
     tl.appendChild(item);
   });
   var items = tl.querySelectorAll('.tl-item');
