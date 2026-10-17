@@ -135,6 +135,17 @@ section { padding: 84px 0; }
 .pg-bar { width: 100%; height: 10px; border-radius: 10px; background: var(--line); overflow: hidden; }
 .pg-bar i { display: block; height: 100%; background: var(--accent); border-radius: 10px; }
 .pg-l { color: var(--muted); font-size: 15px; }
+.tl-card .pic.prog.parts { align-items: stretch; padding: 16px 24px; gap: 10px; }
+.pp-h { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; }
+.pp-h b { font-weight: 600; }
+.pp-h span { color: var(--accent); font-weight: 600; }
+.pp { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px; }
+.pp li { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--muted); }
+.pp li.ok { color: var(--ink); }
+.pp i { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; }
+.pp li.ok i { background: var(--accent); border-color: var(--accent); }
+.pp li.ok i::after { content: ""; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+@media (max-width: 560px) { .tl-card .pic.prog.parts { padding: 10px 14px; gap: 6px; } .pp { gap: 5px; } .pp li { font-size: 13px; gap: 8px; } .pp i { width: 16px; height: 16px; } .pp-h { font-size: 13px; } }
 .tl-card .pic.score { display: flex; align-items: center; justify-content: space-around; gap: 16px; padding: 18px; }
 .sc-ring { position: relative; width: 38%; max-width: 170px; aspect-ratio: 1; flex: none; }
 .sc-ring svg { width: 100%; height: 100%; }
@@ -645,6 +656,11 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 
   function arn(n) { return Number(n).toLocaleString('ar-EG', { minimumFractionDigits: (n % 1) ? 1 : 0 }); }
   function progHtml(p) {
+    if (p.parts) {
+      var dn = p.parts.filter(function (x) { return x.done; }).length;
+      return '<div class="pic prog parts"><div class="pp-h"><b>' + p.label + '</b><span>' + arn(dn) + ' / ' + arn(p.parts.length) + '</span></div><ul class="pp">' +
+        p.parts.map(function (x) { return '<li' + (x.done ? ' class="ok"' : '') + '><i></i>' + x.n + '</li>'; }).join('') + '</ul></div>';
+    }
     return '<div class="pic prog"><div class="pg-n">' + arn(p.pct) + '٪</div><div class="pg-bar"><i style="width:' + p.pct + '%"></i></div><div class="pg-l">' + p.label + '</div></div>';
   }
   function scoreHtml(s) {
@@ -669,6 +685,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
         { src: 'assets/memories/math-1.jpg', cap: 'صفحة نهاية التأسيس' },
         { src: 'assets/memories/math-2.jpg', cap: 'فهرس كتاب التجميعات من نفس المنصة' }
       ] },
+    { y: '١٥ أكتوبر ٢٠٢٦', t: 'بديت الفيزياء', d: 'مساء نفس اليوم، بعد صلاة المغرب والعشاء، بديت أذاكر مادة الفيزياء للتحصيلي المبكر.', prog: { label: 'الفيزياء · البداية', pct: 0 } },
+    { y: '١٧ أكتوبر ٢٠٢٦', t: 'خلصت تأسيس فيزياء أول ثانوي', d: 'الساعة ٤:٣٢ العصر خلصت أول جزء من أجزاء الفيزياء الأربعة في مذاكرتي للتحصيلي المبكر.', prog: { label: 'أجزاء الفيزياء', parts: [{ n: 'تأسيس أول ثانوي', done: true }, { n: 'تجميعات أول ثانوي' }, { n: 'تأسيس ثاني ثانوي' }, { n: 'تجميعات ثاني ثانوي' }] } },
     { y: 'اليوم', t: 'مستمر في الطريق', d: 'بديت أذاكر للتحصيلي المبكر من ثاني يوم بعد اختبار القدرات تقريباً، وهدفي أدخل جامعة الملك فهد للبترول والمعادن.', now: true }
   ];
   var tl = document.getElementById('tl'), fill = document.getElementById('tlfill');
